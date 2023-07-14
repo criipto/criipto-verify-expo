@@ -1,0 +1,40 @@
+{
+  "name": "@criipto/verify-expo",
+  "version": "1.0.0",
+  "description": "Accept MitID, NemID, Swedish BankID, Norwegian BankID and more logins in your Expo (React-Native) app",
+  "main": "dist/index.js",
+  "directories": {
+    "example": "example"
+  },
+  "dependencies": {
+    "js-tokens": "^4.0.0",
+    "loose-envify": "^1.4.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --outDir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/criipto/criipto-verify-expo.git"
+  },
+  "keywords": [
+    "criipto",
+    "verify",
+    "expo",
+    "react-native",
+    "mitid",
+    "bankid"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/criipto/criipto-verify-expo/issues"
+  },
+  "homepage": "https://github.com/criipto/criipto-verify-expo#readme"
+}
