@@ -1,4 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
+import * as Linking from 'expo-linking';
 import { StyleSheet, Text, View, Button } from 'react-native';
 
 import {CriiptoVerifyProvider, useCriiptoVerify} from '@criipto/verify-expo';
@@ -19,14 +20,27 @@ export default function App() {
 }
 
 function LoginButton() {
-  const {login} = useCriiptoVerify();
+  const {login, claims, error} = useCriiptoVerify();
 
-  const handlePress = () => {
-    login();
+  const handlePress = async (acrValues) => {
+    const redirectUri = Linking.createURL('/auth/criipto');
+    const result = await login(acrValues, redirectUri);
+    console.log(result);
   };
 
   return (
-    <Button onPress={handlePress} title="Login" />
+    <>
+      <Button onPress={() => handlePress('urn:grn:authn:se:bankid-same-device')} title="Login with Swedish BankID" />
+      <Button onPress={() => handlePress('urn:grn:authn:fi:bank-id')} title="Login with Finnish BankID" />
+
+      {error ? (
+        <Text>An error occurred: {error.toString()}</Text>
+      ) : null}
+
+      {claims ? (
+        <Text>{JSON.stringify(claims, null, 2)}</Text>
+      ) : null}
+    </>
   )
 }
 

@@ -13,11 +13,28 @@ export type Claims = {
   [key: string]: string | number
 }
 
+export class OAuth2Error extends Error {
+  error: string;
+  error_description?: string;
+  state?: string;
+
+  constructor(error: string, error_description?: string, state?: string) {
+    super(error + (error_description ? ` (${error_description})` : ''));
+    this.name = "OAuth2Error";
+    this.error = error;
+    this.error_description = error_description;
+    this.state = state;
+  }
+}
+
 export type AcrValues = 
   'urn:grn:authn:se:bankid:same-device' | string
 
 export interface CriiptoVerifyContextInterface {
-  login: (acrValues: AcrValues) => Promise<void>,
+  login: (acrValues: AcrValues, redirectUri: string) => Promise<{id_token: string, claims: Claims} | OAuth2Error | Error>,
+
+  claims: Claims | null,
+  error: Error | OAuth2Error | null
 }
 
 /**
@@ -31,7 +48,9 @@ const stub = (): never => {
  * @ignore
  */
 const initialContext = {
-  login: stub
+  login: stub,
+  claims: null,
+  error: null
 };
 
 const CriiptoVerifyContext = createContext<CriiptoVerifyContextInterface>(initialContext);
