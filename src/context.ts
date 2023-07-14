@@ -13,8 +13,11 @@ export type Claims = {
   [key: string]: string | number
 }
 
+export type AcrValues = 
+  'urn:grn:authn:se:bankid:same-device' | string
+
 export interface CriiptoVerifyContextInterface {
-  login: () => Promise<void>,
+  login: (acrValues: AcrValues) => Promise<void>,
 }
 
 /**

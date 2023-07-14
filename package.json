@@ -15,13 +15,18 @@
     "react": "^18.2.0",
     "text-encoding": "^0.7.0"
   },
+  "peerDependencies": {
+    "react-native": "*"
+  },
   "devDependencies": {
     "@types/react": "^18.2.15",
+    "@types/react-native": "^0.72.2",
     "typescript": "^5.1.6"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --outDir dist",
+    "pack": "npm run build && npm pack",
     "prepublishOnly": "npm run build"
   },
   "repository": {
