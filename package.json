@@ -19,7 +19,8 @@
     "text-encoding": "^0.7.0"
   },
   "peerDependencies": {
-    "react-native": "*"
+    "react-native": "*",
+    "expo-linking": "*"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

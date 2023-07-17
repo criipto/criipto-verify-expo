@@ -30,7 +30,7 @@ function LoginButton() {
 
   return (
     <>
-      <Button onPress={() => handlePress('urn:grn:authn:se:bankid-same-device')} title="Login with Swedish BankID" />
+      <Button onPress={() => handlePress('urn:grn:authn:se:bankid:same-device')} title="Login with Swedish BankID" />
       <Button onPress={() => handlePress('urn:grn:authn:fi:bank-id')} title="Login with Finnish BankID" />
 
       {error ? (

@@ -5,6 +5,7 @@ import * as crypto from 'expo-crypto';
 import {decode, encode} from 'base-64';
 import jwtDecode from 'jwt-decode';
 import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import 'react-native-url-polyfill/auto';
 import { buildAuthorizeURL, codeExchange, generatePlatformPKCE, OpenIDConfigurationManager } from '@criipto/oidc';
 
@@ -27,6 +28,16 @@ interface CriiptoVerifyProviderOptions {
   domain: string
   clientID: string,
   children: React.ReactNode
+}
+
+interface SwedishBankIDInitial {
+  launchLinks: {
+    universalLink: string,
+    customFileHandlerUrl: string,
+    cancelUrl: string, 
+    completeUrl: string,
+    pollUrl: null
+  }
 }
 
 function generatePKCE() {
@@ -52,13 +63,24 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
     const authorizeUrl = buildAuthorizeURL(discovery, {
       redirect_uri: redirectUri,
       scope: 'openid',
-      response_mode: 'query',
+      response_mode: acrValues === 'urn:grn:authn:se:bankid:same-device' ? 'json' : 'query',
       response_type: 'code',
       acr_values: acrValues,
       code_challenge: pkce.code_challenge,
       code_challenge_method: pkce.code_challenge_method,
-      prompt: 'login'
+      prompt: 'login',
+      login_hint: `appswitch:${Platform.OS}`
     });
+
+    if (acrValues === 'urn:grn:authn:se:bankid:same-device') {
+      const response = await fetch(authorizeUrl);
+      const payload : SwedishBankIDInitial = await response.json();
+      console.log(payload);
+
+      console.log(payload.launchLinks.universalLink);
+      await Linking.openURL(payload.launchLinks.universalLink);
+      throw new Error('Not implemented yet');
+    }
 
     const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
     if (result.type === 'success') {
@@ -73,7 +95,6 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
         if ("error" in response) {
           throw new OAuth2Error(response.error, response.error_description, response.state);
         } else if ("id_token" in response) {
-          console.log(response.id_token);
           return {
             id_token: response.id_token,
             claims: jwtDecode(response.id_token)
