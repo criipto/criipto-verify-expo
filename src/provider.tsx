@@ -7,9 +7,9 @@ import jwtDecode from 'jwt-decode';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import 'react-native-url-polyfill/auto';
-import { buildAuthorizeURL, codeExchange, generatePlatformPKCE, OpenIDConfiguration, OpenIDConfigurationManager } from '@criipto/oidc';
+import { AuthorizeURLOptions, buildAuthorizeURL, codeExchange, generatePlatformPKCE, OpenIDConfiguration, OpenIDConfigurationManager } from '@criipto/oidc';
 
-import CriiptoVerifyContext, { CriiptoVerifyContextInterface, OAuth2Error, Claims } from './context';
+import CriiptoVerifyContext, { CriiptoVerifyContextInterface, OAuth2Error, Claims, UserCancelledError } from './context';
 import { createMemoryStorage } from './memory-storage';
 import { SwedishBankIDTransaction, DanishMitIDTransaction, Transaction } from './transaction';
 import useAppState from './hooks/useAppState';
@@ -77,7 +77,7 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
   const login : CriiptoVerifyContextInterface["login"] = useCallback(async (acrValues, redirectUri, params) => {
     const discovery = await openIDConfigurationManager.fetch();
     const pkce = await generatePKCE();
-    const authorizeUrl = buildAuthorizeURL(discovery, {
+    const authorizeOptions : AuthorizeURLOptions = {
       redirect_uri: redirectUri,
       scope: `openid${params?.scope ? ' '+params.scope : ''}`,
       response_mode: acrValues === 'urn:grn:authn:se:bankid:same-device' ? 'json' : 'query',
@@ -87,7 +87,9 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       code_challenge_method: pkce.code_challenge_method,
       prompt: 'login',
       login_hint: `appswitch:${Platform.OS}${params?.login_hint ? ' '+params.login_hint : ''}`
-    });
+    };
+
+    const authorizeUrl = buildAuthorizeURL(discovery, authorizeOptions);
     authorizeUrl.searchParams.set('criipto_sdk', `@criipto/verify-expo@1.0.0`)
 
     if (acrValues === 'urn:grn:authn:se:bankid:same-device') {
@@ -98,7 +100,7 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       const transactionPromise = new Promise<void>((resolve, reject) => {
         const transaction = new SwedishBankIDTransaction(redirectUri, resolve, async () => {
           await fetch(authorizePayload.cancelUrl);
-          reject(new OAuth2Error('access_denied', 'User cancelled login'));
+          reject(new UserCancelledError());
         });
 
         setTransaction(transaction);
@@ -113,14 +115,35 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       return await handleURL(discovery, pkce, redirectUri, new URL(completePayload.location));
     }
 
-    const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri, {
-      createTask: Platform.OS === 'android' && acrValues.startsWith('urn:grn:authn:dk:mitid:') ? false : undefined
-    });
+    if (acrValues.startsWith('urn:grn:authn:dk:mitid:')) {
+      const resumeUrl = redirectUri.startsWith('https://') ? redirectUri : null;
+      const transactionPromise = new Promise<string>((resolve, reject) => {
+        const transaction = new DanishMitIDTransaction(redirectUri, resumeUrl, resolve);
+        setTransaction(transaction);
+      });
+      const browserResult = WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri, {
+        createTask: Platform.OS === 'android' ? false : undefined
+      });
+
+      const url = await Promise.race([
+        transactionPromise,
+        browserResult.then(result => {
+          if (result.type === 'success') return result.url;
+          if (result.type === 'dismiss') throw new UserCancelledError();
+          throw new Error('Unexpected browser result: ' + JSON.stringify(result));
+        }),
+      ]);
+      return await handleURL(discovery, pkce, redirectUri, new URL(url));
+    }
+
+    const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
+    
     if (result.type === 'success') {
       const url = new URL(result.url);
       return await handleURL(discovery, pkce, redirectUri, url);
     } else {
-      throw new Error('Unexpected browser results: ' + JSON.stringify(result));
+      if (result.type === 'dismiss') throw new UserCancelledError();
+      throw new Error('Unexpected browser result: ' + JSON.stringify(result));
     }
   }, [openIDConfigurationManager, setError, setClaims]);
 

@@ -27,6 +27,13 @@ export class OAuth2Error extends Error {
   }
 }
 
+export class UserCancelledError extends OAuth2Error {
+  constructor() {
+    super('access_denied', 'User cancelled login');
+    this.name = "UserCancelledError";
+  }
+}
+
 export type AcrValues = 
   'urn:grn:authn:se:bankid:same-device' | string
 
