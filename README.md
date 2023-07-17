@@ -10,6 +10,10 @@ Switchback from the Danish MitID mobile application will only work if you are us
 
 [Guide to Expo universal links](https://docs.expo.dev/guides/deep-linking/)
 
+### Expo Go + Android + Danish MitID
+
+Danish MitID on Android will not work with Expo Go due to the use of `createTask: false`. You must use a build to test, for instance with `npx expo run:android`
+
 ## Installation
 
 Using [npm](https://npmjs.org/)
