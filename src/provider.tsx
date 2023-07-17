@@ -33,12 +33,11 @@ interface CriiptoVerifyProviderOptions {
 }
 
 interface SwedishBankIDInitial {
+  cancelUrl: string
+  completeUrl: string
   launchLinks: {
-    universalLink: string,
-    customFileHandlerUrl: string,
-    cancelUrl: string, 
-    completeUrl: string,
-    pollUrl: null
+    customFileHandlerUrl: string
+    universalLink: string
   }
 }
 
@@ -89,28 +88,7 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       login_hint: `appswitch:${Platform.OS}`
     });
 
-    if (acrValues === 'urn:grn:authn:se:bankid:same-device') {
-      const response = await fetch(authorizeUrl);
-      const payload : SwedishBankIDInitial = await response.json();
-      console.log(payload);
-
-      console.log(payload.launchLinks.universalLink);
-      
-      const transactionPromise = new Promise<void>((resolve, reject) => {
-        new SwedishBankIDTransaction(redirectUri, resolve, async () => {
-          await fetch(payload.launchLinks.cancelUrl);
-          reject(new OAuth2Error('access_denied', 'User cancelled login'));
-        });
-      });
-
-      await Linking.openURL(payload.launchLinks.universalLink);
-      await transactionPromise;
-      
-    }
-
-    const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
-    if (result.type === 'success') {
-      const url = new URL(result.url);
+    async function handleURL(url: URL) {
       if (url.searchParams.get('code')) {
         const response = await codeExchange(discovery, {
           code: url.searchParams.get('code')!,
@@ -123,7 +101,7 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
         } else if ("id_token" in response) {
           return {
             id_token: response.id_token,
-            claims: jwtDecode(response.id_token)
+            claims: jwtDecode<Claims>(response.id_token)
           }
         } else {
           throw new Error('Unexpected code exchange response: ' + JSON.stringify(response));
@@ -137,10 +115,37 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
 
         throw error;
       } else {
-        throw new Error('Unexpected URL response: ' + result.url);
+        throw new Error('Unexpected URL response: ' + url.href);
       }
-    } else if (result.type === 'cancel' || result.type === 'dismiss') {
-      throw new OAuth2Error('access_denied', 'User cancelled/dismissed browser');
+    }
+
+    if (acrValues === 'urn:grn:authn:se:bankid:same-device') {
+      const authorizeResponse = await fetch(authorizeUrl);
+      if (authorizeResponse.status >= 400) throw new Error(await authorizeResponse.text());
+      const authorizePayload : SwedishBankIDInitial = await authorizeResponse.json();
+      
+      const transactionPromise = new Promise<void>((resolve, reject) => {
+        const transaction = new SwedishBankIDTransaction(redirectUri, resolve, async () => {
+          await fetch(authorizePayload.cancelUrl);
+          reject(new OAuth2Error('access_denied', 'User cancelled login'));
+        });
+
+        setTransaction(transaction);
+      });
+
+      await Linking.openURL(authorizePayload.launchLinks.universalLink);
+      await transactionPromise;
+      
+      const completeResponse = await fetch(authorizePayload.completeUrl);
+      if (completeResponse.status >= 400) throw new Error(await completeResponse.text());
+      const completePayload : {location: string} = await completeResponse.json();
+      return await handleURL(new URL(completePayload.location));
+    }
+
+    const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
+    if (result.type === 'success') {
+      const url = new URL(result.url);
+      return await handleURL(url);
     } else {
       throw new Error('Unexpected browser results: ' + JSON.stringify(result));
     }
