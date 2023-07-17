@@ -33,3 +33,22 @@ export class SwedishBankIDTransaction implements Transaction {
     }
   }
 }
+
+export class DanishMitIDTransaction implements Transaction {
+  redirectUri: string
+  onComplete: () => void
+
+  constructor(redirectUri: string, onComplete: () => void) {
+    this.redirectUri = redirectUri;
+    this.onComplete = onComplete;
+  }
+
+  onForeground() {
+  }
+
+  onUrl(url: string) {
+    if (url.startsWith(this.redirectUri)) {
+      console.log(url);
+    }
+  }
+}

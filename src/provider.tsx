@@ -7,11 +7,11 @@ import jwtDecode from 'jwt-decode';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import 'react-native-url-polyfill/auto';
-import { buildAuthorizeURL, codeExchange, generatePlatformPKCE, OpenIDConfigurationManager } from '@criipto/oidc';
+import { buildAuthorizeURL, codeExchange, generatePlatformPKCE, OpenIDConfiguration, OpenIDConfigurationManager } from '@criipto/oidc';
 
 import CriiptoVerifyContext, { CriiptoVerifyContextInterface, OAuth2Error, Claims } from './context';
 import { createMemoryStorage } from './memory-storage';
-import { SwedishBankIDTransaction, Transaction } from './transaction';
+import { SwedishBankIDTransaction, DanishMitIDTransaction, Transaction } from './transaction';
 import useAppState from './hooks/useAppState';
 
 if (typeof global.TextEncoder === "undefined") {
@@ -49,6 +49,7 @@ function generatePKCE() {
     }
   });
 }
+type PKCE = Awaited<ReturnType<typeof generatePKCE>>
 
 const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Element => {
   const openIDConfigurationManager = useMemo(() => {
@@ -89,37 +90,6 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
     });
     authorizeUrl.searchParams.set('criipto_sdk', `@criipto/verify-expo@1.0.0`)
 
-    async function handleURL(url: URL) {
-      if (url.searchParams.get('code')) {
-        const response = await codeExchange(discovery, {
-          code: url.searchParams.get('code')!,
-          redirect_uri: redirectUri,
-          code_verifier: pkce.code_verifier
-        });
-
-        if ("error" in response) {
-          throw new OAuth2Error(response.error, response.error_description, response.state);
-        } else if ("id_token" in response) {
-          return {
-            id_token: response.id_token,
-            claims: jwtDecode<Claims>(response.id_token)
-          }
-        } else {
-          throw new Error('Unexpected code exchange response: ' + JSON.stringify(response));
-        }
-      } else if (url.searchParams.get('error')) {
-        const error = new OAuth2Error(
-          url.searchParams.get('error')!,
-          url.searchParams.get('error_description') ?? undefined,
-          url.searchParams.get('state') ?? undefined
-        );
-
-        throw error;
-      } else {
-        throw new Error('Unexpected URL response: ' + url.href);
-      }
-    }
-
     if (acrValues === 'urn:grn:authn:se:bankid:same-device') {
       const authorizeResponse = await fetch(authorizeUrl);
       if (authorizeResponse.status >= 400) throw new Error(await authorizeResponse.text());
@@ -140,13 +110,15 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       const completeResponse = await fetch(authorizePayload.completeUrl);
       if (completeResponse.status >= 400) throw new Error(await completeResponse.text());
       const completePayload : {location: string} = await completeResponse.json();
-      return await handleURL(new URL(completePayload.location));
+      return await handleURL(discovery, pkce, redirectUri, new URL(completePayload.location));
     }
 
-    const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
+    const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri, {
+      createTask: Platform.OS === 'android' && acrValues.startsWith('urn:grn:authn:dk:mitid:') ? false : undefined
+    });
     if (result.type === 'success') {
       const url = new URL(result.url);
-      return await handleURL(url);
+      return await handleURL(discovery, pkce, redirectUri, url);
     } else {
       throw new Error('Unexpected browser results: ' + JSON.stringify(result));
     }
@@ -181,3 +153,34 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
 }
 
 export default CriiptoVerifyProvider;
+
+async function handleURL(discovery: OpenIDConfiguration, pkce: PKCE, redirectUri: string, url: URL) {
+  if (url.searchParams.get('code')) {
+    const response = await codeExchange(discovery, {
+      code: url.searchParams.get('code')!,
+      redirect_uri: redirectUri,
+      code_verifier: pkce.code_verifier
+    });
+
+    if ("error" in response) {
+      throw new OAuth2Error(response.error, response.error_description, response.state);
+    } else if ("id_token" in response) {
+      return {
+        id_token: response.id_token,
+        claims: jwtDecode<Claims>(response.id_token)
+      }
+    } else {
+      throw new Error('Unexpected code exchange response: ' + JSON.stringify(response));
+    }
+  } else if (url.searchParams.get('error')) {
+    const error = new OAuth2Error(
+      url.searchParams.get('error')!,
+      url.searchParams.get('error_description') ?? undefined,
+      url.searchParams.get('state') ?? undefined
+    );
+
+    throw error;
+  } else {
+    throw new Error('Unexpected URL response: ' + url.href);
+  }
+}
