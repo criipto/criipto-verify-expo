@@ -31,7 +31,11 @@ export type AcrValues =
   'urn:grn:authn:se:bankid:same-device' | string
 
 export interface CriiptoVerifyContextInterface {
-  login: (acrValues: AcrValues, redirectUri: string) => Promise<{id_token: string, claims: Claims} | OAuth2Error | Error>,
+  login: (
+    acrValues: AcrValues,
+    redirectUri: string,
+    params?: {scope: string, login_hint: string}
+  ) => Promise<{id_token: string, claims: Claims} | OAuth2Error | Error>,
 
   claims: Claims | null,
   error: Error | OAuth2Error | null

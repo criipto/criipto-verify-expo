@@ -73,20 +73,21 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
     return () => subscription.remove();
   }, [transaction]);
 
-  const login : CriiptoVerifyContextInterface["login"] = useCallback(async (acrValues, redirectUri) => {
+  const login : CriiptoVerifyContextInterface["login"] = useCallback(async (acrValues, redirectUri, params) => {
     const discovery = await openIDConfigurationManager.fetch();
     const pkce = await generatePKCE();
     const authorizeUrl = buildAuthorizeURL(discovery, {
       redirect_uri: redirectUri,
-      scope: 'openid',
+      scope: `openid${params?.scope ? ' '+params.scope : ''}`,
       response_mode: acrValues === 'urn:grn:authn:se:bankid:same-device' ? 'json' : 'query',
       response_type: 'code',
       acr_values: acrValues,
       code_challenge: pkce.code_challenge,
       code_challenge_method: pkce.code_challenge_method,
       prompt: 'login',
-      login_hint: `appswitch:${Platform.OS}`
+      login_hint: `appswitch:${Platform.OS}${params?.login_hint ? ' '+params.login_hint : ''}`
     });
+    authorizeUrl.searchParams.set('criipto_sdk', `@criipto/verify-expo@1.0.0`)
 
     async function handleURL(url: URL) {
       if (url.searchParams.get('code')) {
