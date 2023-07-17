@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {Platform} from 'react-native';
 import TextEncoding from 'text-encoding';
 import * as crypto from 'expo-crypto';
@@ -11,6 +11,8 @@ import { buildAuthorizeURL, codeExchange, generatePlatformPKCE, OpenIDConfigurat
 
 import CriiptoVerifyContext, { CriiptoVerifyContextInterface, OAuth2Error, Claims } from './context';
 import { createMemoryStorage } from './memory-storage';
+import { SwedishBankIDTransaction, Transaction } from './transaction';
+import useAppState from './hooks/useAppState';
 
 if (typeof global.TextEncoder === "undefined") {
   global.TextEncoder = TextEncoding.TextEncoder;
@@ -56,6 +58,21 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
 
   const [error, setError] = useState<OAuth2Error | Error | null>(null);
   const [claims, setClaims] = useState<Claims | null>(null);
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
+
+  useAppState(() => {
+    if (!transaction) return;
+    transaction.onForeground();
+  }, [transaction]);
+
+  useEffect(() => {
+    if (!transaction) return;
+    const urlCallback : Linking.URLListener = (event) => {
+      transaction.onUrl(event.url);
+    }
+    const subscription = Linking.addEventListener('url', urlCallback);
+    return () => subscription.remove();
+  }, [transaction]);
 
   const login : CriiptoVerifyContextInterface["login"] = useCallback(async (acrValues, redirectUri) => {
     const discovery = await openIDConfigurationManager.fetch();
@@ -78,8 +95,17 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       console.log(payload);
 
       console.log(payload.launchLinks.universalLink);
+      
+      const transactionPromise = new Promise<void>((resolve, reject) => {
+        new SwedishBankIDTransaction(redirectUri, resolve, async () => {
+          await fetch(payload.launchLinks.cancelUrl);
+          reject(new OAuth2Error('access_denied', 'User cancelled login'));
+        });
+      });
+
       await Linking.openURL(payload.launchLinks.universalLink);
-      throw new Error('Not implemented yet');
+      await transactionPromise;
+      
     }
 
     const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
