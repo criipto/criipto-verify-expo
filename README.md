@@ -66,6 +66,7 @@ export default function LoginButton() {
 
   const handlePress = async (acrValues) => {
     // The generated redirectUri must be registered as an allowed URL on your application via the Criipto Dashboard.
+    // Use a https:// universal/app link if you wish to support appswitch with Danish MitID
     const redirectUri = Linking.createURL('/auth/criipto');
     const result = await login(acrValues, redirectUri);
   };
