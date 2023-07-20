@@ -13,7 +13,7 @@ Switchback from the Danish MitID mobile application will only work if you are us
 
 [Guide to Expo universal links](https://docs.expo.dev/guides/deep-linking/)
 
-Enable switchback by adding the following to your `app.json`:
+Enable switchback on android by adding the following to your `app.json`:
 
 ```
 "plugins": [
