@@ -6,6 +6,8 @@ const modifier = (config, options) => {
     return withAndroidManifest(config, config => {
       const application = config.modResults.manifest.application.find(s => s.$['android:name'] === '.MainApplication');
       if (!application) throw new Error('Unable to find MainApplication in manifest');
+      if (!androidAppLinks.length) return config;
+
       const criiptoVerifyActivity = {
         '$': {
           'android:name': 'expo.modules.criiptoverify.CriiptoVerifyActivity',
