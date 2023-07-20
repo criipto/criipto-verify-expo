@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {Platform} from 'react-native';
 import TextEncoding from 'text-encoding';
 import * as crypto from 'expo-crypto';
+import Constants, {ExecutionEnvironment} from 'expo-constants';
 import {decode, encode} from 'base-64';
 import jwtDecode from 'jwt-decode';
 import * as WebBrowser from 'expo-web-browser';
@@ -13,6 +14,8 @@ import CriiptoVerifyContext, { CriiptoVerifyContextInterface, OAuth2Error, Claim
 import { createMemoryStorage } from './memory-storage';
 import { SwedishBankIDTransaction, DanishMitIDTransaction, Transaction } from './transaction';
 import useAppState from './hooks/useAppState';
+
+import * as CriiptoVerifyExpoModule from './CriiptoVerifyExpoModule';
 
 if (typeof global.TextEncoder === "undefined") {
   global.TextEncoder = TextEncoding.TextEncoder;
@@ -116,7 +119,25 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
     }
 
     if (acrValues.startsWith('urn:grn:authn:dk:mitid:')) {
+      const isUniversalLink = redirectUri.startsWith('https://');
+
+      if (isUniversalLink && Constants.executionEnvironment === ExecutionEnvironment.StoreClient) {
+        throw new Error('MitID with universal links will not work in Expo Go');
+      }
+
       const resumeUrl = redirectUri.startsWith('https://') ? redirectUri : null;
+      
+      if (Platform.OS === 'android' && isUniversalLink) {
+        const url = await CriiptoVerifyExpoModule.start({
+          authorizeUrl: authorizeUrl.href,
+          redirectUri: redirectUri
+        });
+        if (url === null) {
+          throw new UserCancelledError();
+        }
+        return await handleURL(discovery, pkce, redirectUri, new URL(url));
+      }
+
       const transactionPromise = new Promise<string>((resolve, reject) => {
         const transaction = new DanishMitIDTransaction(redirectUri, resumeUrl, resolve);
         setTransaction(transaction);
