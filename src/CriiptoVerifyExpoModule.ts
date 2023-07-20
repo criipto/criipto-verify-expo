@@ -6,6 +6,5 @@ const module = requireNativeModule('CriiptoVerifyExpo');
 
 export async function start(params: {authorizeUrl: string, redirectUri: string}) : Promise<string | null> {
   const response = await module.startAsync(params);
-  console.log(null);
   return response;
 }
