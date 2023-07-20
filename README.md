@@ -6,11 +6,26 @@ Accept MitID, NemID, Swedish BankID, Norwegian BankID and more logins in your Ex
 
 `@criipto/verify-react` supports app switching for Swedish BankID and Danish MitID.
 
+### Danish MitID + Android
+
+
 Switchback from the Danish MitID mobile application will only work if you are using a universal link / app link as your redirect_uri.
 
 [Guide to Expo universal links](https://docs.expo.dev/guides/deep-linking/)
 
-### Expo Go + Android + Danish MitID
+Enable switchback by adding the following to your `app.json`:
+
+```
+"plugins": [
+  ["@criipto/verify-expo", {
+    "androidAppLinks": [
+      "https://..."
+    ]
+  }]
+]
+```
+
+#### Expo Go
 
 Danish MitID on Android will not work with Expo Go due to the use of `createTask: false`. You must use a build to test, for instance with `npx expo run:android`
 

@@ -1,0 +1,8 @@
+{
+  "platforms": ["ios", "android"],
+  "android": {
+    "modules": [
+      "expo.modules.criiptoverify.CriiptoVerifyExpoModule"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="expo.modules.criiptoverify">
+  <queries>
+    <intent>
+      <!-- Required for opening tabs if targeting API 30 -->
+      <action android:name="android.support.customtabs.action.CustomTabsService" />
+    </intent>
+  </queries>
+  <uses-permission android:name="android.permission.INTERNET" />
+</manifest>
