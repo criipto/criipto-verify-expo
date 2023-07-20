@@ -8,7 +8,6 @@ Accept MitID, NemID, Swedish BankID, Norwegian BankID and more logins in your Ex
 
 ### Danish MitID + Android
 
-
 Switchback from the Danish MitID mobile application will only work if you are using a universal link / app link as your redirect_uri.
 
 [Guide to Expo universal links](https://docs.expo.dev/guides/deep-linking/)
