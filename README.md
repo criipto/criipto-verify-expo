@@ -4,7 +4,7 @@ Accept MitID, NemID, Swedish BankID, Norwegian BankID and more logins in your Ex
 
 ## App switch support
 
-`@criipto/verify-react` supports app switching for Swedish BankID and Danish MitID.
+`@criipto/verify-expo` supports app switching for Swedish BankID and Danish MitID.
 
 ### Danish MitID + Android
 
