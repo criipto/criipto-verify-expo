@@ -29,6 +29,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "check": "tsc --noEmit",
     "build": "tsc --outDir dist",
     "pack": "npm run build && npm pack",
     "prepublishOnly": "npm run build"

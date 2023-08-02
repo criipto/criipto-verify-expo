@@ -167,7 +167,7 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       throw new Error('Unexpected browser result: ' + JSON.stringify(result));
     }
   }, [openIDConfigurationManager, setError, setClaims]);
-
+  
   const context = useMemo<CriiptoVerifyContextInterface>(() => {
     return {
       login: async (...args) => {
@@ -183,6 +183,10 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
           setError(error);
           throw error;
         });
+      },
+      logout: async () => {
+        setClaims(null);
+        setError(null);
       },
       claims,
       error

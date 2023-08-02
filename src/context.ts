@@ -44,6 +44,8 @@ export interface CriiptoVerifyContextInterface {
     params?: {scope: string, login_hint: string}
   ) => Promise<{id_token: string, claims: Claims} | OAuth2Error | Error>,
 
+  logout: () => Promise<void>,
+
   claims: Claims | null,
   error: Error | OAuth2Error | null
 }
@@ -60,6 +62,7 @@ const stub = (): never => {
  */
 const initialContext = {
   login: stub,
+  logout: stub,
   claims: null,
   error: null
 };
