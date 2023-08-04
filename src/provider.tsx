@@ -89,7 +89,12 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       code_challenge: pkce.code_challenge,
       code_challenge_method: pkce.code_challenge_method,
       prompt: 'login',
-      login_hint: `appswitch:${Platform.OS}${params?.login_hint ? ' '+params.login_hint : ''}`
+      login_hint: 
+        // Settings appswitch login_hint for BankID will break downstream biometrics login_hints
+        // Needs to be fixed in Criipto Verify
+        acrValues.startsWith('urn:grn:authn:no:bankid') ? 
+          undefined : 
+          `appswitch:${Platform.OS}${params?.login_hint ? ' '+params.login_hint : ''}`
     };
 
     const authorizeUrl = buildAuthorizeURL(discovery, authorizeOptions);
