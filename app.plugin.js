@@ -27,8 +27,8 @@ const modifier = (config, options) => {
           data: {
             '$': {
               'android:scheme': "https",
-              'android:host': "criipto-samples-applinks.netlify.app",
-              'android:pathPrefix': "/auth/criipto"
+              'android:host': new URL(href).host,
+              'android:pathPrefix': new URL(href).pathname
             }
           },
           category: [
