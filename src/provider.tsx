@@ -12,7 +12,7 @@ import { AuthorizeURLOptions, buildAuthorizeURL, codeExchange, generatePlatformP
 
 import CriiptoVerifyContext, { CriiptoVerifyContextInterface, OAuth2Error, Claims, UserCancelledError } from './context';
 import { createMemoryStorage } from './memory-storage';
-import { SwedishBankIDTransaction, DanishMitIDTransaction, Transaction } from './transaction';
+import { SwedishBankIDTransaction, DanishMitIDTransaction, Transaction, OpenIDTransaction } from './transaction';
 import useAppState from './hooks/useAppState';
 
 import * as CriiptoVerifyExpoModule from './CriiptoVerifyExpoModule';
@@ -69,8 +69,9 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
   }, [transaction]);
 
   useEffect(() => {
-    if (!transaction) return;
     const urlCallback : Linking.URLListener = (event) => {
+      console.log(event.url, !!transaction);
+      if (!transaction) return;
       transaction.onUrl(event.url);
     }
     const subscription = Linking.addEventListener('url', urlCallback);
@@ -79,6 +80,7 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
 
   const login : CriiptoVerifyContextInterface["login"] = useCallback(async (acrValues, redirectUri, params) => {
     const discovery = await openIDConfigurationManager.fetch();
+    const isUniversalLink = redirectUri.startsWith('https://');
     const pkce = await generatePKCE();
     const authorizeOptions : AuthorizeURLOptions = {
       redirect_uri: redirectUri,
@@ -124,8 +126,6 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
     }
 
     if (acrValues.startsWith('urn:grn:authn:dk:mitid:')) {
-      const isUniversalLink = redirectUri.startsWith('https://');
-
       if (isUniversalLink && Constants.executionEnvironment === ExecutionEnvironment.StoreClient) {
         throw new Error('MitID with universal links will not work in Expo Go');
       }
@@ -162,14 +162,45 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       return await handleURL(discovery, pkce, redirectUri, new URL(url));
     }
 
-    const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
-    
-    if (result.type === 'success') {
-      const url = new URL(result.url);
-      return await handleURL(discovery, pkce, redirectUri, url);
+    if (isUniversalLink) {
+      console.log("Start OpenID Transaction");
+      const transactionPromise = new Promise<string>((resolve, reject) => {
+        const transaction = new OpenIDTransaction(redirectUri, resolve);
+        setTransaction(transaction);
+      });
+      const browserResult = WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
+      const url = await Promise.race([
+        transactionPromise,
+        browserResult.then(result => {
+          if (result.type === 'success') return result.url;
+          if (result.type === 'dismiss') throw new UserCancelledError();
+          throw new Error('Unexpected browser result: ' + JSON.stringify(result));
+        }),
+      ]).catch(err => {
+        if (Platform.OS === 'ios') {
+          console.log("dismissBrowser");
+          WebBrowser.dismissBrowser();
+        }
+        throw err;  
+      });
+
+      if (Platform.OS === 'ios') {
+        console.log("dismissBrowser")
+        WebBrowser.dismissBrowser();
+      }
+
+      console.log(url);
+      return await handleURL(discovery, pkce, redirectUri, new URL(url));
     } else {
-      if (result.type === 'dismiss') throw new UserCancelledError();
-      throw new Error('Unexpected browser result: ' + JSON.stringify(result));
+      const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
+      
+      if (result.type === 'success') {
+        const url = new URL(result.url);
+        return await handleURL(discovery, pkce, redirectUri, url);
+      } else {
+        if (result.type === 'dismiss') throw new UserCancelledError();
+        throw new Error('Unexpected browser result: ' + JSON.stringify(result));
+      }
     }
   }, [openIDConfigurationManager, setError, setClaims]);
   
