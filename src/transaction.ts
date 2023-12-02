@@ -62,6 +62,32 @@ export class DanishMitIDTransaction implements Transaction {
   }
 }
 
+export class OpenIDTransaction implements Transaction {
+  redirectUri: string
+  onComplete: (url: string) => void
+
+  constructor(
+    redirectUri: string,
+    onComplete: (url: string) => void
+  ) {
+    this.redirectUri = redirectUri;
+    this.onComplete = onComplete;
+  }
+
+  onForeground() {
+
+  }
+
+  onUrl(url: string) {
+    console.log(url, this.redirectUri);
+    if (isRedirectURI(url, this.redirectUri)) {
+      if (url.includes('code=') || url.includes('error=')) {
+        this.onComplete(url);
+      }
+    }
+  }
+}
+
 function isRedirectURI(url: string | URL, redirectUri: string | URL) {
   if (!(url instanceof URL)) url = new URL(url);
   if (!(redirectUri instanceof URL)) redirectUri = new URL(redirectUri);
