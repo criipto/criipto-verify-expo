@@ -209,6 +209,8 @@ export default CriiptoVerifyProvider;
 
 async function handleURL(discovery: OpenIDConfiguration, pkce: PKCE, redirectUri: string, url: URL) {
   if (url.searchParams.get('code')) {
+    if (!pkce.code_verifier?.length) throw new Error('pkce.code_verifier is empty');
+
     const response = await codeExchange(discovery, {
       code: url.searchParams.get('code')!,
       redirect_uri: redirectUri,
