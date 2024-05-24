@@ -97,7 +97,7 @@ export default function LoginButton() {
 npm run build && npm run pack
 
 #in example
-npm install ../criipto-verify-expo-1.0.0.tgz
+npm install ../criipto-verify-expo-2.0.0.tgz
 npm start
 ```
 

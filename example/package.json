@@ -1,6 +1,6 @@
 {
   "name": "example",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
@@ -9,15 +9,16 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@criipto/verify-expo": "^1.0.0",
-    "expo": "~48.0.18",
-    "expo-linking": "~4.0.1",
-    "expo-status-bar": "~1.4.4",
+    "@criipto/verify-expo": "^2.0.0",
+    "expo": "^51.0.8",
+    "expo-linking": "~6.3.1",
+    "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
-    "react-native": "0.71.8"
+    "react-native": "0.74.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
   },
   "private": true
-}
+ }
+ 
