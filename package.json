@@ -19,7 +19,7 @@
   },
   "peerDependencies": {
     "expo-linking": "*",
-    "react": "^18.0.0",
+    "react": "18 - 19",
     "react-native": "*"
   },
   "devDependencies": {
