@@ -9,7 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@criipto/verify-expo": "file:../criipto-verify-expo-3.0.0.tgz",
+    "@criipto/verify-expo": "^3.0.0",
     "expo": "53",
     "expo-linking": "~7.1.7",
     "expo-status-bar": "~2.2.3",
