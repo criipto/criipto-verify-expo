@@ -1,0 +1,22 @@
+name: Publish
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+      # Ensure npm 11.5.1 or later is installed, to enable OIDC publishing
+      - name: Update npm
+        run: npm install -g npm@11.5.1
+      - run: npm ci
+      - run: npm run check
+      - run: npm publish --provenance
