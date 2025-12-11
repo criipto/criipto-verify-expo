@@ -1,0 +1,17 @@
+name: check
+on: push
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm run check
+      
