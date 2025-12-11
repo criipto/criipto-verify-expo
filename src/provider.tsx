@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, ReactElement } from 'react';
 import {Platform} from 'react-native';
 import TextEncoding from 'text-encoding';
 import * as crypto from 'expo-crypto';
@@ -54,7 +54,7 @@ function generatePKCE() {
 }
 type PKCE = Awaited<ReturnType<typeof generatePKCE>>
 
-const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Element => {
+const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : ReactElement => {
   const openIDConfigurationManager = useMemo(() => {
     return new OpenIDConfigurationManager(`https://${props.domain}`, props.clientID, createMemoryStorage())
   }, [props.domain, props.clientID]);
