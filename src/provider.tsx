@@ -148,7 +148,8 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
         setTransaction(transaction);
       });
       const browserResult = WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri, {
-        createTask: Platform.OS === 'android' ? false : undefined
+        createTask: Platform.OS === 'android' ? false : undefined,
+        preferEphemeralSession: params?.preferEphemeralSession ?? false
       });
 
       const url = await Promise.race([
@@ -162,7 +163,9 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions) : JSX.Elemen
       return await handleURL(discovery, pkce, redirectUri, new URL(url));
     }
 
-    const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri);
+    const result = await WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri, {
+      preferEphemeralSession: params?.preferEphemeralSession ?? false
+    });
     
     if (result.type === 'success') {
       const url = new URL(result.url);
