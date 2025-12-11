@@ -41,7 +41,7 @@ export interface CriiptoVerifyContextInterface {
   login: (
     acrValues: AcrValues,
     redirectUri: string,
-    params?: {scope: string, login_hint: string}
+    params?: {scope: string, login_hint: string, preferEphemeralSession?: boolean}
   ) => Promise<{id_token: string, claims: Claims} | OAuth2Error | Error>,
 
   logout: () => Promise<void>,
