@@ -10,7 +10,7 @@ Accept MitID, NemID, Swedish BankID, Norwegian BankID and more logins in your Ex
 
 Switchback from the Danish MitID mobile application will only work if you are using a universal link / app link as your redirect_uri.
 
-[Guide to Expo universal links](https://docs.expo.dev/guides/deep-linking/)
+[Guide to Expo universal links](https://docs.expo.dev/linking/overview/#universal-linking)
 
 Enable switchback on android by adding the following to your `app.json`:
 
@@ -104,3 +104,4 @@ npm start
 ## Criipto
 
 Learn more about Criipto and sign up for your free developer account at [criipto.com](https://www.criipto.com).
+
