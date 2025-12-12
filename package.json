@@ -49,6 +49,12 @@
     "mitid",
     "bankid"
   ],
+  "files": [
+    "dist",
+    "android",
+    "expo-module.config.json",
+    "app.plugin.js"
+  ],
   "author": "",
   "license": "MIT",
   "bugs": {
