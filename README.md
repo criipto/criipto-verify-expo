@@ -104,4 +104,3 @@ npm start
 ## Criipto
 
 Learn more about Criipto and sign up for your free developer account at [criipto.com](https://www.criipto.com).
-
