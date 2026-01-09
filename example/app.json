@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "example",
+    "name": "Criipto Verify Expo Example",
     "slug": "example",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,17 +11,17 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "eu.idura.example"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "eu.idura.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"
