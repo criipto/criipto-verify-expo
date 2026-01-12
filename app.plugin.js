@@ -24,6 +24,14 @@ const modifier = (config, options) => {
         "android:exported": "true",
         "android:launchMode": "singleTop",
       },
+    };
+
+    const redirectUriReceiverActivity = {
+      $: {
+        "android:name": "expo.modules.criiptoverify.RedirectUriReceiverActivity",
+        "android:exported": "true",
+        "android:launchMode": "singleTop",
+      },
       "intent-filter": androidAppLinks.map((href) => ({
         $: {
           "android:autoVerify": "true",
@@ -56,8 +64,12 @@ const modifier = (config, options) => {
       })),
     };
     application.activity = application.activity
-      .filter((s) => s["$"]["android:name"] !== "expo.modules.criiptoverify.CriiptoVerifyActivity")
-      .concat([criiptoVerifyActivity]);
+      .filter(
+        (s) =>
+          s["$"]["android:name"] !== criiptoVerifyActivity["$"]["android:name"] &&
+          s["$"]["android:name"] !== redirectUriReceiverActivity["$"]["android:name"],
+      )
+      .concat([criiptoVerifyActivity, redirectUriReceiverActivity]);
     return config;
   });
 };
