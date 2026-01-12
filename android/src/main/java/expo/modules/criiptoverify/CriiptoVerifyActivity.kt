@@ -129,5 +129,13 @@ class CriiptoVerifyActivity : AppCompatActivity() {
         addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
       }
+
+    public fun createResponseHandlingIntent(
+      context: Context,
+      responseUri: Uri,
+    ): Intent =
+      createBaseIntent(context).apply {
+        setData(responseUri)
+      }
   }
 }
