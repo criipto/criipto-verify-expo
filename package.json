@@ -12,7 +12,7 @@
     "expo-constants": "^18.0.11",
     "expo-crypto": "~13.0.2",
     "expo-modules-core": "^3.0.28",
-    "expo-web-browser": "^12.3.2",
+    "expo-web-browser": "^14.2.0",
     "js-tokens": "^4.0.0",
     "jwt-decode": "^3.1.2",
     "loose-envify": "^1.4.0",
@@ -20,6 +20,7 @@
     "text-encoding": "^0.7.0"
   },
   "peerDependencies": {
+    "expo": "52 - 54",
     "expo-linking": "*",
     "react": "18 - 19",
     "react-native": "*"
@@ -27,7 +28,8 @@
   "devDependencies": {
     "@types/react": "^19.1.9",
     "@types/react-native": "^0.72.2",
-    "react": "^19.1.1",
+    "expo-linking": "~7.1.7",
+    "react-native": "^0.79.6",
     "typescript": "^5.1.6"
   },
   "scripts": {
