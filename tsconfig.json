@@ -14,10 +14,7 @@
     "strictFunctionTypes": true,
     "skipLibCheck": true,
     "noImplicitThis": true,
-    "noImplicitReturns": true,
+    "noImplicitReturns": true
   },
-  "include": [
-    "src/**/*",
-    "src/*"
-  ]
+  "include": ["src/**/*", "src/*"]
 }
