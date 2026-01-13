@@ -1,6 +1,6 @@
 {
   "name": "@criipto/verify-expo",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Accept MitID, NemID, Swedish BankID, Norwegian BankID and more logins in your Expo (React-Native) app",
   "main": "dist/index.js",
   "directories": {
