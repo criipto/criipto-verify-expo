@@ -84,14 +84,24 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions): ReactElemen
     transaction.onForeground();
   }, [transaction]);
 
+  const linkingUrl = Linking.useLinkingURL();
+
   useEffect(() => {
-    if (!transaction) return;
-    const urlCallback: Linking.URLListener = (event) => {
-      transaction.onUrl(event.url);
-    };
-    const subscription = Linking.addEventListener("url", urlCallback);
-    return () => subscription.remove();
-  }, [transaction]);
+    if (!transaction || !linkingUrl) {
+      return;
+    }
+    // useLinkingURL returns the URL with a single slash (scheme:/path), while Linking.createUrl
+    // returns it with 3 (scheme:///path). So we need to parse the URLs to compare them
+    const linkingUrlUrl = new URL(linkingUrl);
+    const redirectUriUrl = new URL(transaction.redirectUri);
+
+    if (
+      linkingUrlUrl.protocol === redirectUriUrl.protocol &&
+      linkingUrlUrl.pathname === redirectUriUrl.pathname
+    ) {
+      transaction.onUrl(linkingUrl);
+    }
+  }, [transaction, linkingUrl]);
 
   const login: CriiptoVerifyContextInterface["login"] = useCallback(
     async (acrValues, redirectUri, params) => {
@@ -214,6 +224,9 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions): ReactElemen
           .catch((error) => {
             setError(error);
             throw error;
+          })
+          .finally(() => {
+            setTransaction(null);
           });
       },
       logout: async () => {
