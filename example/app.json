@@ -26,6 +26,23 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "scheme": "criiptosample"
+    "scheme": "criiptosample",
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 29
+          }
+        }
+      ],
+      [
+        "@criipto/verify-expo",
+        {
+          "domain": "jan-verify-expo-test.criipto.id",
+          "clientID": "urn:my:application:identifier:743766"
+        }
+      ]
+    ]
   }
 }
