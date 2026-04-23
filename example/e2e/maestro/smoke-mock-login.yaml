@@ -5,6 +5,7 @@ name: smoke-mock-login
     clearState: true
 - assertVisible: "Login with Mock"
 - tapOn: "Login with Mock"
+- takeScreenshot: 01-after-tap
 # Android: Chrome Custom Tab may show a "Welcome to Chrome" first-run
 # dialog on a fresh emulator before the auth page loads. Dismiss it if
 # it appears so the flow can proceed to the mock endpoint.
@@ -13,22 +14,31 @@ name: smoke-mock-login
       platform: Android
     commands:
       - waitForAnimationToEnd:
-          timeout: 10000
+          timeout: 15000
+      - takeScreenshot: 02-android-settled
       - runFlow:
           when:
             visible: "Use without an account"
           commands:
             - tapOn: "Use without an account"
-# iOS: ASWebAuthenticationSession shows a system consent dialog before
-# the browser opens. Accept it.
+      - takeScreenshot: 03-android-after-welcome-dismiss
+# iOS: ASWebAuthenticationSession may show a system consent dialog before
+# the browser opens. Tap its "Continue" button only if present — on some
+# iOS 18 simulator configurations the dialog is suppressed entirely.
 - runFlow:
     when:
       platform: iOS
     commands:
-      - extendedWaitUntil:
-          visible: "Continue"
-          timeout: 10000
-      - tapOn: "Continue"
+      - waitForAnimationToEnd:
+          timeout: 15000
+      - takeScreenshot: 02-ios-settled
+      - runFlow:
+          when:
+            visible: "Continue"
+          commands:
+            - tapOn: "Continue"
+      - takeScreenshot: 03-ios-after-consent
+- takeScreenshot: 04-before-sub-assert
 # Criipto's mock ACR auto-completes without user input, so once the browser
 # hands control back to the app we should see the JSON-stringified claims
 # rendered on screen. `"sub"` is a JWT claim that's always present.
