@@ -1,0 +1,25 @@
+appId: eu.idura.expo.example
+
+
+# User cancels by rejecting the login request in the Vipps app
+
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Vipps MobilePay"
+- tapOn: "Open Vipps"
+# If Vipps is locked, unlock with PIN 1236 (skip the fingerprint prompt).
+- runFlow:
+    when:
+      visible: "Enter your code"
+    commands:
+      - tapOn: "Enter your code"
+      - tapOn: "1"
+      - tapOn: "2"
+      - tapOn: "3"
+      - tapOn: "6"
+- assertVisible: "Do you want to log in to Criipto?"
+- tapOn: "Cancel"
+- assertVisible: "Are you sure you want to cancel log in?"
+- tapOn: "Yes"
+- assertVisible: ".*UserCancelledError.*"

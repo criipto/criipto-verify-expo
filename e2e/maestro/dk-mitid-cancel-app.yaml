@@ -1,0 +1,14 @@
+appId: eu.idura.expo.example
+
+
+# User cancels by rejecting from the MitID app. Currently not supported
+
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Danish MitID"
+- tapOn: "Continue.*"
+- tapOn: "Open MitID App"
+- tapOn: "Close"
+- tapOn: "Yes"
+- assertVisible: ".*UserCancelledError.*"

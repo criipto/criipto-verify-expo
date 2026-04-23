@@ -1,0 +1,39 @@
+appId: eu.idura.expo.example
+
+
+# This test assumes:
+# * The Vipps MobilePay app is installed and signed in as a test user.
+# * That user's Vipps PIN is 1236.
+#
+# Two steps are state-dependent and therefore conditional:
+# * The PIN unlock only appears when Vipps has locked itself (session timeout).
+#   When it does, Vipps shows the system biometric prompt; we fall back to the
+#   PIN pad via "Enter your code". Maestro can't satisfy the fingerprint sensor.
+# * The browser consent page is shown only the first time; Vipps remembers the
+#   consent for a year, so on later runs the flow returns straight to the app.
+
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Vipps MobilePay"
+- tapOn: "Open Vipps"
+# If Vipps is locked, unlock with PIN 1236 (skip the fingerprint prompt).
+- runFlow:
+    when:
+      visible: "Enter your code"
+    commands:
+      - tapOn: "Enter your code"
+      - tapOn: "1"
+      - tapOn: "2"
+      - tapOn: "3"
+      - tapOn: "6"
+- assertVisible: "Do you want to log in to Criipto?"
+- tapOn: "Continue"
+# First-time data-sharing consent in the browser (remembered for a year).
+- runFlow:
+    when:
+      visible: "Continue as.*"
+    commands:
+      - tapOn: "Continue as.*"
+- assertVisible: "Logged in!"
+- assertVisible: '.*"identityscheme": "novipps.*'

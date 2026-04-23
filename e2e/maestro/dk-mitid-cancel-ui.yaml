@@ -1,0 +1,11 @@
+appId: eu.idura.expo.example
+
+
+## User cancels by clicking cancel in the MitId UI
+
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Danish MitID"
+- tapOn: "Cancel"
+- assertVisible: ".*UserCancelledError.*"

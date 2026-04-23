@@ -1,0 +1,8 @@
+appId: eu.idura.expo.example
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Swedish BankID"
+- tapOn: "Open"
+- tapOn: "Navigate up"
+- assertVisible: ".*UserCancelledError.*"

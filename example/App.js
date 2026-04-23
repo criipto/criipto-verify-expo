@@ -56,7 +56,12 @@ function LoginButton() {
 
       {error ? <Text>An error occurred: {error.toString()}</Text> : null}
 
-      {claims ? <Text>{JSON.stringify(claims, null, 2)}</Text> : null}
+      {claims ? (
+        <>
+          <Text>Logged in!</Text>
+          <Text>{JSON.stringify(claims, null, 2)}</Text>
+        </>
+      ) : null}
     </>
   );
 }

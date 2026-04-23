@@ -1,0 +1,25 @@
+appId: eu.idura.expo.example
+
+
+# This test assumes that:
+# * You have signed in with MitID before, and the browser remembers you username
+# * You MitID passcode is 112233
+
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Danish MitID"
+- tapOn: "Continue.*"
+- tapOn: "Open MitID App"
+- assertVisible: "Enter PIN"
+- tapOn: "1"
+- tapOn: "1"
+- tapOn: "2"
+- tapOn: "2"
+- tapOn: "3"
+- tapOn: "3"
+- swipe:
+    start: 25%, 90%
+    end: 75%, 90%
+- assertVisible: "Logged in!"
+- assertVisible: '.*"identityscheme": "dkmitid".*'

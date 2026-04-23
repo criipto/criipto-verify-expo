@@ -1,0 +1,20 @@
+appId: eu.idura.expo.example
+
+
+# This test assumes that:
+# * You have signed in with NO BankID before, and the browser remembers you username
+# * Your device passcode is 1337
+
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Norwegian BankID"
+- tapOn: "Confirm login"
+- tapOn: "Use PIN"
+- tapOn: "1"
+- tapOn: "3"
+- tapOn: "3"
+- tapOn: "7"
+- tapOn: "Next"
+- assertVisible: "Logged in!"
+- assertVisible: '.*"identityscheme": "nobankid.*'
