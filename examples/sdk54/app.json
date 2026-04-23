@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "sdk54-fixture",
+    "slug": "sdk54-fixture",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "bundleIdentifier": "eu.idura.sdk54fixture"
+    },
+    "android": {
+      "package": "eu.idura.sdk54fixture"
+    },
+    "scheme": "criiptofixture54",
+    "plugins": [
+      [
+        "@criipto/verify-expo",
+        {
+          "domain": "samples.criipto.id",
+          "clientID": "urn:criipto:samples:criipto-verify-expo"
+        }
+      ]
+    ]
+  }
+}

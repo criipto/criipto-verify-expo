@@ -1,0 +1,9 @@
+node_modules/
+.expo/
+dist/
+npm-debug.*
+android/
+ios/
+*.orig.*
+.DS_Store
+.metro-health-check*

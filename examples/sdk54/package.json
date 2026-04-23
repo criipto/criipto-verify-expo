@@ -1,0 +1,21 @@
+{
+  "name": "sdk54-fixture",
+  "version": "1.0.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "android": "expo run:android"
+  },
+  "dependencies": {
+    "@criipto/verify-expo": "../..",
+    "expo": "~54.0.33",
+    "expo-dev-client": "~6.0.20",
+    "expo-linking": "~8.0.11",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0"
+  }
+}
