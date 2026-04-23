@@ -95,6 +95,24 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions): ReactElemen
 
   const login: CriiptoVerifyContextInterface["login"] = useCallback(
     async (acrValues, redirectUri, params) => {
+      if (Platform.OS === "android") {
+        // All Android flows — Danish MitID (with app switch), Swedish BankID,
+        // Norwegian/Finnish BankID, Freja, etc. — are handled by the native Idura
+        // Verify SDK. OIDC discovery, PKCE, the browser tab, MitID app switching,
+        // and token exchange all happen in Kotlin. `redirectUri` is ignored: the
+        // SDK uses https://{domain}/android/callback, wired up by the Expo plugin.
+        const { id_token } = await CriiptoVerifyExpoModule.login({
+          acrValues,
+          scope: params?.scope,
+          loginHint: params?.login_hint,
+          prompt: "login",
+        });
+        return {
+          id_token,
+          claims: jwtDecode<Claims>(id_token),
+        };
+      }
+
       const discovery = await openIDConfigurationManager.fetch();
       const pkce = await generatePKCE();
       const authorizeOptions: AuthorizeURLOptions = {
@@ -152,23 +170,11 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions): ReactElemen
 
         const resumeUrl = redirectUri.startsWith("https://") ? redirectUri : null;
 
-        if (Platform.OS === "android" && isUniversalLink) {
-          const url = await CriiptoVerifyExpoModule.start({
-            authorizeUrl: authorizeUrl.href,
-            redirectUri: redirectUri,
-          });
-          if (url === null) {
-            throw new UserCancelledError();
-          }
-          return await handleURL(discovery, pkce, redirectUri, new URL(url));
-        }
-
         const transactionPromise = new Promise<string>((resolve, reject) => {
           const transaction = new DanishMitIDTransaction(redirectUri, resumeUrl, resolve);
           setTransaction(transaction);
         });
         const browserResult = WebBrowser.openAuthSessionAsync(authorizeUrl.href, redirectUri, {
-          createTask: Platform.OS === "android" ? false : undefined,
           preferEphemeralSession: params?.preferEphemeralSession ?? false,
         });
 

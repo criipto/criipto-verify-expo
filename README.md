@@ -2,39 +2,49 @@
 
 Accept MitID, NemID, Swedish BankID, Norwegian BankID and more logins in your Expo (React-Native) app with @criipto/verify-expo.
 
+## Requirements
+
+- Expo SDK **54 or newer** (ships React Native 0.81 / Kotlin 2.1.20 / AGP 8.11).
+- Android `minSdkVersion` **29 or newer**. Expo's prebuild default is 24, so you must opt in explicitly via [`expo-build-properties`](https://docs.expo.dev/versions/latest/sdk/build-properties/) — see [Installation](#installation).
+- iOS 13 or newer.
+
+The Android implementation delegates to the native [Idura Verify Android SDK](https://github.com/criipto/idura-verify-android), which has these floor requirements. Consumers on older Expo releases should stay on `@criipto/verify-expo` 3.x.
+
 ## App switch support
 
 `@criipto/verify-expo` supports app switching for Swedish BankID and Danish MitID.
 
 ### Danish MitID + Android
 
-Switchback from the Danish MitID mobile application will only work if you are using a universal link / app link as your redirect_uri.
-
-[Guide to Expo universal links](https://docs.expo.dev/linking/overview/#universal-linking)
-
-Enable switchback on android by adding the following to your `app.json`:
-
-```
-"plugins": [
-  ["@criipto/verify-expo", {
-    "androidAppLinks": [
-      "https://..."
-    ]
-  }]
-]
-```
+Switchback is handled natively by the Idura Verify Android SDK using a universal link at `https://{YOUR_CRIIPTO_DOMAIN}/android/callback`. No extra configuration is needed — the Expo plugin wires up the intent filter and the SDK takes care of the app-switch dance.
 
 #### Expo Go
 
-Danish MitID on Android will not work with Expo Go due to the use of `createTask: false`. You must use a build to test, for instance with `npx expo run:android`
+Danish MitID on Android will not work with Expo Go. You must use a build, for instance `npx expo run:android` or EAS Build.
 
 ## Installation
 
 Using [npm](https://npmjs.org/)
 
 ```sh
-npm install @criipto/verify-expo
+npm install @criipto/verify-expo expo-build-properties
 ```
+
+Then configure both plugins in `app.json`. `expo-build-properties` must appear **before** `@criipto/verify-expo` so the minSdk override is applied first:
+
+```json
+"plugins": [
+  ["expo-build-properties", {
+    "android": { "minSdkVersion": 29 }
+  }],
+  ["@criipto/verify-expo", {
+    "domain": "YOUR_CRIIPTO_DOMAIN",
+    "clientID": "urn:my:application:identifier:XXXX"
+  }]
+]
+```
+
+The plugin fails `expo prebuild` with a clear error if `expo-build-properties` is missing or sets a lower `minSdkVersion` — there is no way to use the Android SDK below API 29.
 
 ## Getting Started
 
