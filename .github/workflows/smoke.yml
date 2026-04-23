@@ -1,0 +1,147 @@
+name: smoke
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    name: iOS smoke
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Build the library
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install example deps
+        working-directory: example
+        run: npm ci
+
+      - name: Prebuild iOS project
+        working-directory: example
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Install CocoaPods
+        working-directory: example/ios
+        run: pod install
+
+      - name: Derive Xcode scheme from generated workspace
+        working-directory: example/ios
+        run: |
+          NAME=$(basename "$(find . -maxdepth 1 -name '*.xcworkspace' -type d | head -n 1)" .xcworkspace)
+          echo "IOS_SCHEME=$NAME" >> "$GITHUB_ENV"
+          echo "Using scheme: $NAME"
+
+      - name: Build .app for simulator
+        working-directory: example/ios
+        run: |
+          xcodebuild \
+            -workspace "$IOS_SCHEME.xcworkspace" \
+            -scheme "$IOS_SCHEME" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet
+
+      - name: Boot simulator
+        run: xcrun simctl bootstatus "iPhone 16" -b
+
+      - name: Install app on simulator
+        run: |
+          APP_PATH=$(find example/ios/build -name '*.app' -type d | head -n 1)
+          echo "Installing $APP_PATH"
+          xcrun simctl install booted "$APP_PATH"
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run smoke flow
+        run: maestro test example/e2e/maestro/smoke-mock-login.yaml
+
+      - name: Upload Maestro debug output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-debug-ios
+          path: ~/.maestro/tests/
+          if-no-files-found: ignore
+
+  android:
+    name: Android smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Enable KVM for emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Build the library
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install example deps
+        working-directory: example
+        run: npm ci
+
+      - name: Prebuild Android project
+        working-directory: example
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Assemble release APK
+        working-directory: example/android
+        run: ./gradlew assembleRelease
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Boot emulator and run smoke flow
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: |
+            adb install example/android/app/build/outputs/apk/release/app-release.apk
+            maestro test example/e2e/maestro/smoke-mock-login.yaml
+
+      - name: Upload Maestro debug output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-debug-android
+          path: ~/.maestro/tests/
+          if-no-files-found: ignore
