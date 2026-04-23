@@ -41,16 +41,17 @@ jobs:
       - name: Install library deps
         run: npm ci
 
-      - name: Build library (dist/)
-        run: npm run build
+      - name: Pack library
+        # `npm run pack` builds dist/ and produces ./criipto-verify-expo-<ver>.tgz.
+        # Packing (rather than the fixture's `"../.."` relative dep) avoids npm's
+        # file:-protocol symlink, which would let node resolution escape into the
+        # library's own node_modules and pick up its (possibly SDK-mismatched)
+        # devDeps.
+        run: npm run pack
 
-      - name: Install fixture deps
+      - name: Install fixture deps from tarball
         working-directory: ${{ env.FIXTURE }}
-        run: npm install --no-audit --no-fund
-
-      - name: Align fixture deps to Expo SDK ${{ matrix.sdk }}
-        working-directory: ${{ env.FIXTURE }}
-        run: npx expo install --fix
+        run: npm install ../../criipto-verify-expo-*.tgz --no-save --no-audit --no-fund
 
       - name: Expo prebuild (android)
         working-directory: ${{ env.FIXTURE }}
