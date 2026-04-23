@@ -11,7 +11,7 @@ permissions:
 jobs:
   ios:
     name: iOS smoke
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
             -quiet
 
       - name: Boot simulator
-        run: xcrun simctl bootstatus "iPhone 15" -b
+        run: xcrun simctl bootstatus "iPhone 16" -b
 
       - name: Install app on simulator
         run: |

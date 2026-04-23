@@ -5,8 +5,22 @@ name: smoke-mock-login
     clearState: true
 - assertVisible: "Login with Mock"
 - tapOn: "Login with Mock"
-# iOS: ASWebAuthenticationSession shows a system consent dialog before the
-# browser opens. Android opens a Chrome Custom Tab directly — no dialog.
+# Android: Chrome Custom Tab may show a "Welcome to Chrome" first-run
+# dialog on a fresh emulator before the auth page loads. Dismiss it if
+# it appears so the flow can proceed to the mock endpoint.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 10000
+      - runFlow:
+          when:
+            visible: "Use without an account"
+          commands:
+            - tapOn: "Use without an account"
+# iOS: ASWebAuthenticationSession shows a system consent dialog before
+# the browser opens. Accept it.
 - runFlow:
     when:
       platform: iOS
