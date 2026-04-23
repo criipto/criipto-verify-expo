@@ -37,12 +37,19 @@ jobs:
         working-directory: example/ios
         run: pod install
 
+      - name: Derive Xcode scheme from generated workspace
+        working-directory: example/ios
+        run: |
+          NAME=$(basename "$(find . -maxdepth 1 -name '*.xcworkspace' -type d | head -n 1)" .xcworkspace)
+          echo "IOS_SCHEME=$NAME" >> "$GITHUB_ENV"
+          echo "Using scheme: $NAME"
+
       - name: Build .app for simulator
         working-directory: example/ios
         run: |
           xcodebuild \
-            -workspace example.xcworkspace \
-            -scheme example \
+            -workspace "$IOS_SCHEME.xcworkspace" \
+            -scheme "$IOS_SCHEME" \
             -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build \
@@ -54,7 +61,7 @@ jobs:
 
       - name: Install app on simulator
         run: |
-          APP_PATH=$(find example/ios/build -name "example.app" -type d | head -n 1)
+          APP_PATH=$(find example/ios/build -name '*.app' -type d | head -n 1)
           echo "Installing $APP_PATH"
           xcrun simctl install booted "$APP_PATH"
 
@@ -65,6 +72,14 @@ jobs:
 
       - name: Run smoke flow
         run: maestro test example/e2e/maestro/smoke-mock-login.yaml
+
+      - name: Upload Maestro debug output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-debug-ios
+          path: ~/.maestro/tests/
+          if-no-files-found: ignore
 
   android:
     name: Android smoke
@@ -122,3 +137,11 @@ jobs:
           script: |
             adb install example/android/app/build/outputs/apk/release/app-release.apk
             maestro test example/e2e/maestro/smoke-mock-login.yaml
+
+      - name: Upload Maestro debug output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-debug-android
+          path: ~/.maestro/tests/
+          if-no-files-found: ignore
