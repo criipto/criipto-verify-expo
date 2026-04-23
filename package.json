@@ -21,10 +21,10 @@
     "text-encoding": "^0.7.0"
   },
   "peerDependencies": {
-    "expo": "52 - 54",
+    "expo": ">=54",
     "expo-linking": "*",
-    "react": "18 - 19",
-    "react-native": "*"
+    "react": ">=19",
+    "react-native": ">=0.81"
   },
   "devDependencies": {
     "@types/react": "^19.1.9",
