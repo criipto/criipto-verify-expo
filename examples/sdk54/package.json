@@ -4,7 +4,8 @@
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "android": "expo run:android"
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@criipto/verify-expo": "../..",
@@ -17,5 +18,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.0"
+  },
+  "overrides": {
+    "expo-constants": "~18.0.13",
+    "expo-crypto": "~15.0.8",
+    "expo-modules-core": "~3.0.29",
+    "expo-web-browser": "~15.0.10"
   }
 }
