@@ -1,0 +1,38 @@
+appId: eu.idura.example
+name: mitid-login
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Danish MitID"
+- tapOn: "Continue"
+- tapOn: "Open MitID App"
+- assertVisible: "Enter PIN"
+- tapOn: "1"
+- tapOn: "1"
+- tapOn: "2"
+- tapOn: "2"
+- tapOn: "3"
+- tapOn: "3"
+- swipe:
+    start: 25%, 90%
+    end: 75%, 90%
+- tapOn: "Continue to.*"
+- assertVisible: "Logged in!"
+
+
+# # iOS: ASWebAuthenticationSession shows a system consent dialog before the
+# # browser opens. Android opens a Chrome Custom Tab directly — no dialog.
+# - runFlow:
+#     when:
+#       platform: iOS
+#     commands:
+#       - extendedWaitUntil:
+#           visible: "Continue"
+#           timeout: 10000
+#       - tapOn: "Continue"
+# # Criipto's mock ACR auto-completes without user input, so once the browser
+# # hands control back to the app we should see the JSON-stringified claims
+# # rendered on screen. `"sub"` is a JWT claim that's always present.
+# - extendedWaitUntil:
+#     visible: 'mock'
+#     timeout: 60000

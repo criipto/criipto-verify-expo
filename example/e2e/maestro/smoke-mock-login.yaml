@@ -15,9 +15,4 @@ name: smoke-mock-login
           visible: "Continue"
           timeout: 10000
       - tapOn: "Continue"
-# Criipto's mock ACR auto-completes without user input, so once the browser
-# hands control back to the app we should see the JSON-stringified claims
-# rendered on screen. `"sub"` is a JWT claim that's always present.
-- extendedWaitUntil:
-    visible: '"sub"'
-    timeout: 60000
+- assertVisible: "Logged in!"
