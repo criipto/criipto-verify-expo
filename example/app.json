@@ -14,7 +14,8 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "eu.idura.example"
+      "bundleIdentifier": "eu.idura.example",
+      "appleTeamId": "P56KU6NT8A"
     },
     "android": {
       "adaptiveIcon": {
@@ -33,6 +34,10 @@
         {
           "android": {
             "minSdkVersion": 29
+          },
+          "ios": {
+            "deploymentTarget": "17.4",
+            "useFrameworks": "dynamic"
           }
         }
       ],
