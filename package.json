@@ -2,7 +2,8 @@
   "name": "@criipto/verify-expo",
   "version": "3.0.4",
   "description": "Accept MitID, NemID, Swedish BankID, Norwegian BankID and more logins in your Expo (React-Native) app",
-  "main": "dist/index.js",
+  "main": "./dist/index.mjs",
+  "type": "commonjs",
   "directories": {
     "example": "example"
   },
@@ -29,16 +30,18 @@
     "@types/react": "^19.1.9",
     "@types/react-native": "^0.72.2",
     "expo-linking": "~7.1.7",
-    "react-native": "^0.79.6",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
+    "publint": "^0.3.20",
+    "react-native": "^0.79.6",
+    "tsdown": "^0.22.0",
     "typescript": "^5.1.6"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "check": "tsc --noEmit",
-    "build": "tsc --outDir dist",
+    "build": "tsdown",
     "pack": "npm run build && npm pack",
     "prepublishOnly": "npm run build",
     "prepare": "husky"
@@ -59,7 +62,8 @@
     "dist",
     "android",
     "expo-module.config.json",
-    "app.plugin.js"
+    "app.plugin.js",
+    "plugin/build"
   ],
   "author": "",
   "license": "MIT",
