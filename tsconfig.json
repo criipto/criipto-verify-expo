@@ -3,12 +3,7 @@
     "target": "esnext",
     "lib": ["dom", "esnext"],
     "jsx": "react",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "inlineSources": true,
+    "moduleResolution": "bundler",
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "strictFunctionTypes": true,
@@ -16,5 +11,5 @@
     "noImplicitThis": true,
     "noImplicitReturns": true
   },
-  "include": ["src/**/*", "src/*"]
+  "include": ["src/**/*", "plugin/src/**/*", "tsdown.config.mts"]
 }
