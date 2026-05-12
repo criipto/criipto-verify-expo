@@ -60,7 +60,8 @@
   ],
   "files": [
     "dist",
-    "android",
+    "android/src",
+    "android/build.gradle",
     "expo-module.config.json",
     "app.plugin.js",
     "plugin/build"
