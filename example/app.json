@@ -33,6 +33,10 @@
         {
           "android": {
             "minSdkVersion": 26
+          },
+          "ios": {
+            "useFrameworks": "dynamic",
+            "deploymentTarget": "17.4"
           }
         }
       ],
