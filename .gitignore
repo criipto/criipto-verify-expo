@@ -132,4 +132,5 @@ dist
 *.DS_Store
 
 android/build
+android/.gradle
 plugin/build
