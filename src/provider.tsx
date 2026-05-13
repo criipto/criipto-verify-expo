@@ -211,15 +211,18 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions): ReactElemen
         return login(...args)
           .then((result) => {
             if ("claims" in result) {
+              setError(null);
               setClaims(result.claims);
             }
             if (result instanceof Error) {
               setError(result);
+              setClaims(null);
             }
             return result;
           })
           .catch((error) => {
             setError(error);
+            setClaims(null);
             throw error;
           });
       },
