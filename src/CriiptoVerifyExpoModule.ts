@@ -18,6 +18,7 @@ export interface LoginParams {
   loginHint?: string;
   prompt?: Prompt;
   action?: Action;
+  preferEphemeralSession?: boolean;
 }
 
 export interface LoginResult {
@@ -26,10 +27,12 @@ export interface LoginResult {
 }
 
 /**
- * Android-only. Delegates to the Idura Verify Android SDK, which handles
- * OIDC discovery, PKCE, the browser flow (Auth Tab / Custom Tab), MitID
- * app switching, and token exchange internally. Returns the raw `id_token`
- * so the caller can decode claims with the same `jwt-decode` path used on iOS.
+ * Delegates to the native Idura Verify SDK on both iOS and Android. The native
+ * code handles OIDC discovery, PKCE, the browser flow (ASWebAuthenticationSession
+ * on iOS, Auth Tab / Custom Tab on Android), app switching for MitID/BankID, and
+ * token exchange. The JS side only has to forward parameters and rethrow typed
+ * errors. `preferEphemeralSession` is meaningful only on iOS — the Android SDK
+ * has no equivalent (Custom Tab sessions don't share cookies with the browser).
  */
 export async function login(params: LoginParams): Promise<LoginResult> {
   const module = requireNativeModule("CriiptoVerifyExpo");

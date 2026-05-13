@@ -78,7 +78,6 @@ export type AcrValues = "urn:grn:authn:se:bankid:same-device" | string;
 export interface CriiptoVerifyContextInterface {
   login: (
     acrValues: AcrValues,
-    redirectUri: string,
     params?: {
       scope: string;
       login_hint: string;
