@@ -1,0 +1,18 @@
+appId: eu.idura.example
+name: smoke-mock-login
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Login with Mock"
+- tapOn: "Login with Mock"
+# iOS: ASWebAuthenticationSession shows a system consent dialog before the
+# browser opens. Android opens a Chrome Custom Tab directly — no dialog.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Continue"
+          timeout: 10000
+      - tapOn: "Continue"
+- assertVisible: "Logged in!"
