@@ -105,7 +105,8 @@ const CriiptoVerifyProvider = (props: CriiptoVerifyProviderOptions): ReactElemen
           acrValues,
           scope: params?.scope,
           loginHint: params?.login_hint,
-          prompt: "login",
+          prompt: params?.prompt,
+          action: params?.action,
         });
         return {
           id_token,

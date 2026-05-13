@@ -1,7 +1,7 @@
 import { createContext } from "react";
 
-export const actions = ["confirm", "accept", "approve", "sign", "login"] as const;
-export type Action = (typeof actions)[number];
+export type Action = "confirm" | "accept" | "approve" | "sign" | "login";
+export type Prompt = "login" | "none" | "consent" | "consent_revoke";
 export type Claims = {
   iss: string;
   aud: string;
@@ -40,7 +40,13 @@ export interface CriiptoVerifyContextInterface {
   login: (
     acrValues: AcrValues,
     redirectUri: string,
-    params?: { scope: string; login_hint: string; preferEphemeralSession?: boolean },
+    params?: {
+      scope: string;
+      login_hint: string;
+      preferEphemeralSession?: boolean;
+      action?: Action;
+      prompt?: Prompt;
+    },
   ) => Promise<{ id_token: string; claims: Claims } | OAuth2Error | Error>;
 
   logout: () => Promise<void>;

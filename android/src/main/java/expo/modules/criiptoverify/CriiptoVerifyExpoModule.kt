@@ -104,6 +104,7 @@ private fun buildEid(params: LoginParams): EID<*> {
     ?.split(' ')
     ?.filter { it.isNotBlank() }
     ?.forEach { eid.withLoginHint(it) }
+  params.action?.let { eid.withLoginHint("action:$it") }
   return eid
 }
 

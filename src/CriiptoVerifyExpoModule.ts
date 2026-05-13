@@ -1,12 +1,13 @@
 import { requireNativeModule } from "expo-modules-core";
 
-import { OAuth2Error, UserCancelledError } from "./context";
+import { Action, OAuth2Error, Prompt, UserCancelledError } from "./context";
 
 export interface LoginParams {
   acrValues: string;
   scope?: string;
   loginHint?: string;
-  prompt?: "login" | "none" | "consent" | "consent_revoke";
+  prompt?: Prompt;
+  action?: Action;
 }
 
 export interface LoginResult {
