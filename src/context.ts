@@ -34,6 +34,37 @@ export class UserCancelledError extends OAuth2Error {
   }
 }
 
+export class NoSuitableBrowserError extends Error {
+  constructor() {
+    super("No suitable browser found");
+    this.name = "NoSuitableBrowserError";
+  }
+}
+
+export class IduraVerifyInternalError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "IduraVerifyInternalError";
+  }
+}
+
+export class ModuleNotConfiguredError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ModuleNotConfiguredError";
+  }
+}
+
+export class UnknownPromptError extends Error {
+  value: string;
+
+  constructor(value: string) {
+    super(`Unknown prompt value: '${value}'`);
+    this.name = "UnknownPromptError";
+    this.value = value;
+  }
+}
+
 export type AcrValues = "urn:grn:authn:se:bankid:same-device" | string;
 
 export interface CriiptoVerifyContextInterface {

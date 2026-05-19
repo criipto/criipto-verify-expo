@@ -3,7 +3,6 @@ package expo.modules.criiptoverify
 import eu.idura.verify.Prompt
 import eu.idura.verify.eid.EID
 import eu.idura.verify.eid.Other
-import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -26,47 +25,19 @@ class LoginParams : Record {
   @Field var action: String? = null
 }
 
-class ModuleNotConfiguredException :
-  CodedException(
-    "IduraVerify was never initialised — CriiptoVerifyPackage's ReactActivityLifecycleListener did not run. Is the host Activity a ComponentActivity, and is @criipto/verify-expo listed under expo.plugins in app.json?",
-  )
-
-class MissingManifestConfigException(
-  key: String,
-) : CodedException(
-    "Missing <meta-data android:name=\"$key\"> in AndroidManifest — configure the @criipto/verify-expo Expo plugin with 'domain' and 'clientID' options, then run `expo prebuild`.",
-  )
+class ModuleNotConfiguredException(
+  message: String,
+) : Exception(message)
 
 class UnknownPromptException(
-  value: String,
-) : CodedException("Unknown prompt value: '$value'")
+  val value: String,
+) : Exception("Unknown prompt value: '$value'")
 
-// Mirror the SDK's typed exceptions into CodedExceptions so the JS side gets stable
-// error codes and can rethrow as `UserCancelledError` / `OAuth2Error` to match the
-// iOS surface. The OAuth error/description pair is round-tripped as a tab-separated
-// message because `CodedException` only carries `code` + `message` across the bridge.
-class UserCancelledException : CodedException("User cancelled login")
-
-class NoSuitableBrowserException : CodedException("No suitable browser found")
-
-class OAuthException(
-  error: String,
-  errorDescription: String?,
-) : CodedException(
-    "ERR_OAUTH",
-    buildString {
-      append(error)
-      append('\t')
-      if (errorDescription != null) append(errorDescription)
-    },
-    null,
-  )
-
-class InternalException(
-  message: String,
-  cause: Throwable?,
-) : CodedException(message, cause)
-
+// Every outcome — SDK calls, preflight setup, input validation — is returned as a
+// `NativeLoginResult` Record. The JS wrapper switches on `kind` and re-throws the
+// matching typed error class, so consumers never see a raw `CodedException` from the
+// bridge. The variant classes live in NativeLoginResult.kt, generated from
+// src/NativeLoginResult.d.ts via `npm run generate-native-types`.
 class CriiptoVerifyExpoModule : Module() {
   override fun definition() =
     ModuleDefinition {
@@ -74,22 +45,32 @@ class CriiptoVerifyExpoModule : Module() {
 
       AsyncFunction("login") Coroutine
         { params: LoginParams ->
-          val sdk =
-            CriiptoVerifyState.result?.getOrThrow()
-              ?: throw ModuleNotConfiguredException()
-          val jwt =
-            try {
-              sdk.login(buildEid(params), params.prompt?.let(::parsePrompt))
-            } catch (e: SdkUserCancelledException) {
-              throw UserCancelledException()
-            } catch (e: SdkNoSuitableBrowserException) {
-              throw NoSuitableBrowserException()
-            } catch (e: SdkOAuthException) {
-              throw OAuthException(e.error, e.errorDescription)
-            } catch (e: SdkInternalException) {
-              throw InternalException(e.message ?: "Idura Verify SDK failure", e)
+          return@Coroutine try {
+            val sdk =
+              CriiptoVerifyState.result?.getOrThrow()
+                ?: throw ModuleNotConfiguredException(
+                  "IduraVerify was never initialised — CriiptoVerifyPackage's ReactActivityLifecycleListener did not run. Is the host Activity a ComponentActivity, and is @criipto/verify-expo listed under expo.plugins in app.json?",
+                )
+            val result = sdk.login(buildEid(params), params.prompt?.let(::parsePrompt))
+            NativeLoginResult.Success().apply { idToken = result.jwt.token }
+          } catch (_: SdkUserCancelledException) {
+            NativeLoginResult.UserCancelled()
+          } catch (_: SdkNoSuitableBrowserException) {
+            NativeLoginResult.NoSuitableBrowser()
+          } catch (e: SdkOAuthException) {
+            NativeLoginResult.OAuthError().apply {
+              error = e.error
+              errorDescription = e.errorDescription
             }
-          return@Coroutine mapOf("id_token" to jwt.token)
+          } catch (e: SdkInternalException) {
+            NativeLoginResult.InternalError().apply {
+              message = e.message ?: "Idura Verify SDK failure"
+            }
+          } catch (e: ModuleNotConfiguredException) {
+            NativeLoginResult.ModuleNotConfigured().apply { message = e.message!! }
+          } catch (e: UnknownPromptException) {
+            NativeLoginResult.UnknownPrompt().apply { value = e.value }
+          }
         }
     }
 }

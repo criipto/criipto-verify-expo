@@ -12,6 +12,9 @@ import expo.modules.core.interfaces.ReactActivityLifecycleListener
 internal const val META_DOMAIN = "criipto.verify.domain"
 internal const val META_CLIENT_ID = "criipto.verify.clientId"
 
+private fun missingManifestKeyMessage(key: String): String =
+  "Missing <meta-data android:name=\"$key\"> in AndroidManifest — configure the @criipto/verify-expo Expo plugin with 'domain' and 'clientID' options, then run `expo prebuild`."
+
 /**
  * Holds the lazily-constructed `IduraVerify` instance between the host Activity's `onCreate` (where
  * it must be built, before the Activity reaches STARTED, so the SDK can register its
@@ -51,10 +54,10 @@ class CriiptoVerifyPackage : BasePackage() {
                   ).metaData
               val domain =
                 metaData?.getString(META_DOMAIN)
-                  ?: throw MissingManifestConfigException(META_DOMAIN)
+                  ?: throw ModuleNotConfiguredException(missingManifestKeyMessage(META_DOMAIN))
               val clientID =
                 metaData.getString(META_CLIENT_ID)
-                  ?: throw MissingManifestConfigException(META_CLIENT_ID)
+                  ?: throw ModuleNotConfiguredException(missingManifestKeyMessage(META_CLIENT_ID))
               IduraVerify(
                 clientID = clientID,
                 domain = domain,
