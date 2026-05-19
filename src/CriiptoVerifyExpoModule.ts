@@ -22,6 +22,7 @@ export interface LoginParams {
 
 export interface LoginResult {
   id_token: string;
+  trace_id: string;
 }
 
 /**
@@ -35,15 +36,20 @@ export async function login(params: LoginParams): Promise<LoginResult> {
   const result: NativeLoginResult = await module.login(params);
   switch (result.kind) {
     case "Success":
-      return { id_token: result.idToken };
+      return { id_token: result.idToken, trace_id: result.traceId };
     case "UserCancelled":
-      throw new UserCancelledError();
+      throw new UserCancelledError(result.traceId ?? undefined);
     case "NoSuitableBrowser":
-      throw new NoSuitableBrowserError();
+      throw new NoSuitableBrowserError(result.traceId ?? undefined);
     case "OAuthError":
-      throw new OAuth2Error(result.error, result.errorDescription ?? undefined);
+      throw new OAuth2Error(
+        result.error,
+        result.errorDescription ?? undefined,
+        undefined,
+        result.traceId ?? undefined,
+      );
     case "InternalError":
-      throw new IduraVerifyInternalError(result.message);
+      throw new IduraVerifyInternalError(result.message, result.traceId ?? undefined);
     case "ModuleNotConfigured":
       throw new ModuleNotConfiguredError(result.message);
     case "UnknownPrompt":

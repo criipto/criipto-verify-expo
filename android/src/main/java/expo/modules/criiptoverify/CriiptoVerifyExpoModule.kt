@@ -52,19 +52,24 @@ class CriiptoVerifyExpoModule : Module() {
                   "IduraVerify was never initialised — CriiptoVerifyPackage's ReactActivityLifecycleListener did not run. Is the host Activity a ComponentActivity, and is @criipto/verify-expo listed under expo.plugins in app.json?",
                 )
             val result = sdk.login(buildEid(params), params.prompt?.let(::parsePrompt))
-            NativeLoginResult.Success().apply { idToken = result.jwt.token }
-          } catch (_: SdkUserCancelledException) {
-            NativeLoginResult.UserCancelled()
-          } catch (_: SdkNoSuitableBrowserException) {
-            NativeLoginResult.NoSuitableBrowser()
+            NativeLoginResult.Success().apply {
+              idToken = result.jwt.token
+              traceId = result.traceId
+            }
+          } catch (e: SdkUserCancelledException) {
+            NativeLoginResult.UserCancelled().apply { traceId = e.traceId }
+          } catch (e: SdkNoSuitableBrowserException) {
+            NativeLoginResult.NoSuitableBrowser().apply { traceId = e.traceId }
           } catch (e: SdkOAuthException) {
             NativeLoginResult.OAuthError().apply {
               error = e.error
               errorDescription = e.errorDescription
+              traceId = e.traceId
             }
           } catch (e: SdkInternalException) {
             NativeLoginResult.InternalError().apply {
               message = e.message ?: "Idura Verify SDK failure"
+              traceId = e.traceId
             }
           } catch (e: ModuleNotConfiguredException) {
             NativeLoginResult.ModuleNotConfigured().apply { message = e.message!! }

@@ -13,14 +13,20 @@ sealed interface NativeLoginResult : Record {
     @Field override var kind: String = "Success"
 
     @Field var idToken: String = ""
+
+    @Field var traceId: String = ""
   }
 
   class UserCancelled : NativeLoginResult {
     @Field override var kind: String = "UserCancelled"
+
+    @Field var traceId: String? = null
   }
 
   class NoSuitableBrowser : NativeLoginResult {
     @Field override var kind: String = "NoSuitableBrowser"
+
+    @Field var traceId: String? = null
   }
 
   class OAuthError : NativeLoginResult {
@@ -29,12 +35,16 @@ sealed interface NativeLoginResult : Record {
     @Field var error: String = ""
 
     @Field var errorDescription: String? = null
+
+    @Field var traceId: String? = null
   }
 
   class InternalError : NativeLoginResult {
     @Field override var kind: String = "InternalError"
 
     @Field var message: String = ""
+
+    @Field var traceId: String? = null
   }
 
   class ModuleNotConfigured : NativeLoginResult {
