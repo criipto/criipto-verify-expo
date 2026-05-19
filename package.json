@@ -43,6 +43,7 @@
     "check": "tsc --noEmit",
     "build": "tsdown",
     "pack": "npm run build && npm pack",
+    "generate-native-types": "node scripts/generate-native-types.mjs",
     "prepublishOnly": "npm run build",
     "prepare": "husky"
   },

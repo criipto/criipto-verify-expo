@@ -1,6 +1,16 @@
 import { requireNativeModule } from "expo-modules-core";
 
-import { Action, OAuth2Error, Prompt, UserCancelledError } from "./context";
+import {
+  Action,
+  IduraVerifyInternalError,
+  ModuleNotConfiguredError,
+  NoSuitableBrowserError,
+  OAuth2Error,
+  Prompt,
+  UnknownPromptError,
+  UserCancelledError,
+} from "./context";
+import type { NativeLoginResult } from "./NativeLoginResult";
 
 export interface LoginParams {
   acrValues: string;
@@ -12,6 +22,7 @@ export interface LoginParams {
 
 export interface LoginResult {
   id_token: string;
+  trace_id: string;
 }
 
 /**
@@ -22,29 +33,26 @@ export interface LoginResult {
  */
 export async function login(params: LoginParams): Promise<LoginResult> {
   const module = requireNativeModule("CriiptoVerifyExpo");
-  try {
-    return await module.login(params);
-  } catch (e) {
-    throw translateNativeError(e);
+  const result: NativeLoginResult = await module.login(params);
+  switch (result.kind) {
+    case "Success":
+      return { id_token: result.idToken, trace_id: result.traceId };
+    case "UserCancelled":
+      throw new UserCancelledError(result.traceId ?? undefined);
+    case "NoSuitableBrowser":
+      throw new NoSuitableBrowserError(result.traceId ?? undefined);
+    case "OAuthError":
+      throw new OAuth2Error(
+        result.error,
+        result.errorDescription ?? undefined,
+        undefined,
+        result.traceId ?? undefined,
+      );
+    case "InternalError":
+      throw new IduraVerifyInternalError(result.message, result.traceId ?? undefined);
+    case "ModuleNotConfigured":
+      throw new ModuleNotConfiguredError(result.message);
+    case "UnknownPrompt":
+      throw new UnknownPromptError(result.value);
   }
-}
-
-// Translates the `code` field set by the Kotlin module's CodedException subclasses
-// (see android/.../CriiptoVerifyExpoModule.kt) back into the cross-platform error
-// types consumers already handle on iOS. ERR_OAUTH packs `error` and
-// `error_description` into the message separated by a tab; everything else is
-// passed through unchanged.
-function translateNativeError(e: unknown): unknown {
-  const code = (e as { code?: string } | null)?.code;
-  const message = (e as { message?: string } | null)?.message ?? "";
-  if (code === "ERR_USER_CANCELLED") {
-    return new UserCancelledError();
-  }
-  if (code === "ERR_OAUTH") {
-    const tab = message.indexOf("\t");
-    const error = tab === -1 ? message : message.slice(0, tab);
-    const description = tab === -1 ? "" : message.slice(tab + 1);
-    return new OAuth2Error(error, description.length ? description : undefined);
-  }
-  return e;
 }
