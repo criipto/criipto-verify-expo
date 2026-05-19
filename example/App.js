@@ -1,15 +1,11 @@
 import { StatusBar } from "expo-status-bar";
-import * as Linking from "expo-linking";
 import { StyleSheet, Text, View, Button } from "react-native";
 
 import { CriiptoVerifyProvider, useCriiptoVerify } from "@criipto/verify-expo";
 
 export default function App() {
   return (
-    <CriiptoVerifyProvider
-      domain="samples.criipto.id"
-      clientID="urn:criipto:samples:criipto-verify-expo"
-    >
+    <CriiptoVerifyProvider>
       <View style={styles.container}>
         <Text>Open up App.js to start working on your app!</Text>
         <StatusBar style="auto" />
@@ -23,8 +19,7 @@ function LoginButton() {
   const { login, claims, error } = useCriiptoVerify();
 
   const handlePress = async (acrValues) => {
-    const redirectUri = Linking.createURL("/auth/criipto");
-    const result = await login(acrValues, redirectUri);
+    const result = await login(acrValues);
     console.log(result);
   };
 
