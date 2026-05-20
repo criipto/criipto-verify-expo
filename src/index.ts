@@ -1,5 +1,6 @@
-export { default as CriiptoVerifyProvider } from "./provider";
-export { default as useCriiptoVerify } from "./use-criipto-verify";
+export { login } from "./CriiptoVerifyExpoModule";
+export type { LoginParams, LoginResult } from "./CriiptoVerifyExpoModule";
+export type { Action, AcrValues, Claims, Prompt } from "./types";
 export {
   IduraVerifyInternalError,
   ModuleNotConfiguredError,
@@ -7,4 +8,4 @@ export {
   OAuth2Error,
   UnknownPromptError,
   UserCancelledError,
-} from "./context";
+} from "./types";

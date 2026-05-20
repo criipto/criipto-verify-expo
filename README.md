@@ -51,36 +51,28 @@ The plugin fails `expo prebuild` with copy-paste-friendly errors if any of these
 
 ## Getting Started
 
-Wrap your application in `CriiptoVerifyProvider`:
+Call `login()` directly — there's no provider or hook to wire up. Configuration (`domain`, `clientID`) lives in `app.json` and is read by the native modules. Hold the result in your own state (`useState`, zustand, react-query — your call) since the package doesn't keep one for you:
 
 ```jsx
-// src/App.jsx
-import { View, Button, Text } from 'react-native';
-import { CriiptoVerifyProvider, useCriiptoVerify } from '@criipto/verify-expo';
-
-import LoginButton from './LoginButton.jsx';
-
-export default function App() {
-  return (
-    <CriiptoVerifyProvider
-      domain="{YOUR_CRIIPTO_DOMAIN}"
-      clientID="{YOUR_CRIIPTO_APPLICATION_CLIENT_ID}"
-    >
-      <View>
-        <LoginButton />
-      </View>
-    </CriiptoVerifyProvider>
-  );
-}
-
 // src/LoginButton.jsx
+import { useState } from "react";
+import { Button, Text } from "react-native";
+import { login, OAuth2Error, UserCancelledError } from "@criipto/verify-expo";
+
 export default function LoginButton() {
-  const { login, claims, error } = useCriiptoVerify();
+  const [claims, setClaims] = useState(null);
+  const [error, setError] = useState(null);
 
   const handlePress = async (acrValues) => {
-    // The `redirectUri` argument is ignored: the native SDKs use
-    // https://{domain}/{platform}/callback, wired up by the Expo plugin.
-    const result = await login(acrValues, '');
+    try {
+      const { id_token, trace_id, claims } = await login({ acrValues });
+      setClaims(claims);
+      setError(null);
+    } catch (e) {
+      if (e instanceof UserCancelledError) return; // expected; not an error condition
+      setError(e);
+      setClaims(null);
+    }
   };
 
   return (
@@ -99,15 +91,10 @@ export default function LoginButton() {
         title="Login with Norwegian BankID"
       />
 
-      {error ? (
-        <Text>An error occurred: {error.toString()}</Text>
-      ) : null}
-
-      {claims ? (
-        <Text>{JSON.stringify(claims, null, 2)}</Text>
-      ) : null}
+      {error ? <Text>An error occurred: {error.toString()}</Text> : null}
+      {claims ? <Text>{JSON.stringify(claims, null, 2)}</Text> : null}
     </>
-  )
+  );
 }
 ```
 
