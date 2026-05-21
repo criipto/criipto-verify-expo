@@ -1,5 +1,3 @@
-import { createContext } from "react";
-
 export type Action = "confirm" | "accept" | "approve" | "sign" | "login";
 export type Prompt = "login" | "none" | "consent" | "consent_revoke";
 export type Claims = {
@@ -74,43 +72,3 @@ export class UnknownPromptError extends Error {
 }
 
 export type AcrValues = "urn:grn:authn:se:bankid:same-device" | string;
-
-export interface CriiptoVerifyContextInterface {
-  login: (
-    acrValues: AcrValues,
-    redirectUri: string,
-    params?: {
-      scope: string;
-      login_hint: string;
-      preferEphemeralSession?: boolean;
-      action?: Action;
-      prompt?: Prompt;
-    },
-  ) => Promise<{ id_token: string; claims: Claims } | OAuth2Error | Error>;
-
-  logout: () => Promise<void>;
-
-  claims: Claims | null;
-  error: Error | OAuth2Error | null;
-}
-
-/**
- * @ignore
- */
-const stub = (): never => {
-  throw new Error("You forgot to wrap your component in <CriiptoVerifyProvider>.");
-};
-
-/**
- * @ignore
- */
-const initialContext = {
-  login: stub,
-  logout: stub,
-  claims: null,
-  error: null,
-};
-
-const CriiptoVerifyContext = createContext<CriiptoVerifyContextInterface>(initialContext);
-
-export default CriiptoVerifyContext;
