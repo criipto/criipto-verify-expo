@@ -19,4 +19,4 @@ jobs:
         run: npm install -g npm@11.5.1
       - run: npm ci
       - run: npm run check
-      - run: npm publish --provenance
+      - run: npm publish --provenance --tag ${{ github.event.release.prerelease && 'beta' || 'latest' }}
