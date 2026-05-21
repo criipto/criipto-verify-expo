@@ -17,8 +17,7 @@
     "react-native": "0.81.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0",
-    "expo-dev-client": "~6.0.20"
+    "@babel/core": "^7.20.0"
   },
   "overrides": {
     "@criipto/verify-expo": {
