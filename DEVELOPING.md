@@ -60,3 +60,12 @@ dependency stays pointed at the published version.
 
 The tarball is a snapshot — there is no live reload of native or `dist/` code.
 Re-run `npm run pack` and the overlay install after each library change.
+
+### On EAS Build
+
+EAS workers reinstall `example/` dependencies from the lockfile, which points at
+the published package — a locally overlaid tarball does not survive the upload.
+The `eas-build-post-install` hook in `example/package.json` therefore repeats
+the overlay on the worker: it packs the library at the repo root and installs
+the tarball into the example, so EAS builds (and the
+[e2e workflow](e2e/README.md)) test the checked-out library code.
