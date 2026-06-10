@@ -1,0 +1,12 @@
+appId: eu.idura.expo.example
+
+
+# User cancels by closing the browser
+
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Norwegian BankID"
+- assertVisible: "Confirm login"
+- tapOn: "Close tab"
+- assertVisible: ".*UserCancelledError.*"

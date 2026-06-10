@@ -14,14 +14,15 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "eu.idura.example"
+      "bundleIdentifier": "eu.idura.expo.example",
+      "appleTeamId": "P56KU6NT8A"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "eu.idura.example"
+      "package": "eu.idura.expo.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -1,0 +1,8 @@
+appId: eu.idura.expo.example
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Login with Mock"
+- tapOn: "Login with Mock"
+- assertVisible: "Logged in!"
+- assertVisible: '.*"identityscheme": "mock".*'

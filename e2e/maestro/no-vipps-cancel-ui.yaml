@@ -1,0 +1,12 @@
+appId: eu.idura.expo.example
+
+
+## User cancels by clicking cancel on the Criipto Vipps page
+
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Vipps MobilePay"
+- assertVisible: "Open Vipps"
+- tapOn: "Cancel and go back to Criipto"
+- assertVisible: ".*UserCancelledError.*"

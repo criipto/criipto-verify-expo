@@ -1,0 +1,13 @@
+appId: eu.idura.expo.example
+
+
+## User cancels by clicking decline in the NO BankID UI
+
+---
+- launchApp:
+    clearState: true
+- tapOn: "Login with Norwegian BankID"
+- assertVisible: "Confirm login"
+- tapOn: "Decline"
+- tapOn: "OK"
+- assertVisible: ".*UserCancelledError.*"
