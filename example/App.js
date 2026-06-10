@@ -48,6 +48,10 @@ function LoginButton() {
         onPress={() => handlePress("urn:grn:authn:no:bankid:substantial")}
         title="Login with Norwegian BankID"
       />
+      <Button
+        onPress={() => handlePress("urn:grn:authn:no:vipps")}
+        title="Login with Vipps MobilePay"
+      />
       <Button onPress={() => handlePress("urn:grn:authn:mock")} title="Login with Mock" />
 
       {error ? <Text>An error occurred: {error.toString()}</Text> : null}
