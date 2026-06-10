@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Criipto Verify Expo Example",
-    "slug": "example",
+    "slug": "criipto-verify-expo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -48,6 +48,12 @@
           "clientID": "urn:criipto:samples:criipto-verify-expo"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "03dd1359-60f3-4d88-8473-e1c031e22707"
+      }
+    },
+    "owner": "janiduras-organization"
   }
 }
