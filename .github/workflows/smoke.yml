@@ -1,0 +1,232 @@
+name: smoke
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    name: iOS smoke
+    runs-on: macos-15
+    timeout-minutes: 40
+    # Non-blocking: the simulator's associated-domains validation (swcd) is
+    # unreliable on GitHub's macOS runners — Apple's AASA CDN is unreachable
+    # from them and even direct fetches hang, so the login intermittently
+    # fails with a configuration error through no fault of the code under
+    # test. The Android job is the gating smoke check; the diagnostics step
+    # below captures the swcd state whenever this job fails.
+    continue-on-error: true
+    env:
+      # jwt-kit (pulled in via the Idura Verify iOS SDK's SwiftPM dependency)
+      # references CryptoKit's ML-DSA types, which only exist from the iOS 26
+      # SDK — the image's default Xcode 16.4 cannot compile it.
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Build and pack the library
+        run: |
+          npm ci
+          npm run pack
+
+      - name: Install example deps and overlay the packed library
+        working-directory: example
+        run: |
+          npm ci
+          npm install ../criipto-verify-expo-*.tgz --no-save
+
+      - name: Prebuild iOS project
+        working-directory: example
+        run: npx expo prebuild --platform ios --no-install
+
+      # The simulator validates associated domains by fetching the AASA file
+      # through Apple's CDN, whose DNS is unreliable from CI runners, so
+      # validation often isn't done by the time the flow logs in (the SDK then
+      # reports the entitlement as missing). `?mode=developer` makes the OS
+      # fetch the AASA directly from the domain instead; simulators honor
+      # developer mode automatically.
+      - name: Switch associated domains to developer mode (bypass Apple CDN)
+        working-directory: example/ios
+        run: |
+          python3 - <<'EOF'
+          import glob, plistlib
+          path = glob.glob("**/*.entitlements", recursive=True)[0]
+          with open(path, "rb") as f:
+              plist = plistlib.load(f)
+          key = "com.apple.developer.associated-domains"
+          plist[key] = [d if "?" in d else f"{d}?mode=developer" for d in plist.get(key, [])]
+          with open(path, "wb") as f:
+              plistlib.dump(plist, f)
+          print(path, plist[key])
+          EOF
+
+      - name: Install CocoaPods
+        working-directory: example/ios
+        run: pod install
+
+      - name: Derive Xcode scheme from generated workspace
+        working-directory: example/ios
+        run: |
+          NAME=$(basename "$(find . -maxdepth 1 -name '*.xcworkspace' -type d | head -n 1)" .xcworkspace)
+          echo "IOS_SCHEME=$NAME" >> "$GITHUB_ENV"
+          echo "Using scheme: $NAME"
+
+      # Keep the default ad-hoc simulator signing ("sign to run locally") —
+      # CODE_SIGNING_ALLOWED=NO would strip the Associated Domains entitlement
+      # that the Idura Verify SDK requires at runtime.
+      - name: Build .app for simulator
+        working-directory: example/ios
+        run: |
+          xcodebuild \
+            -workspace "$IOS_SCHEME.xcworkspace" \
+            -scheme "$IOS_SCHEME" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            -quiet
+
+      # Don't hardcode a device name — the pre-created set changes with the
+      # selected Xcode's simulator runtime; pick an iPhone on the newest
+      # installed iOS runtime. Erase it before booting: image-baked simulators
+      # carry stale swcd state whose half-finished system AASA downloads keep
+      # our domain's validation from ever completing.
+      - name: Boot simulator
+        run: |
+          UDID=$(xcrun simctl list devices available --json | jq -r '
+            [.devices | to_entries[]
+             | {rt: .key, devs: [.value[] | select(.name | startswith("iPhone"))]}
+             | select(.devs | length > 0)]
+            | sort_by(.rt) | last | .devs[0].udid')
+          xcrun simctl list devices available
+          echo "Erasing and booting $UDID"
+          xcrun simctl erase "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+
+      - name: Install app on simulator
+        run: |
+          APP_PATH=$(find example/ios/build -name '*.app' -type d | head -n 1)
+          echo "Installing $APP_PATH"
+          xcrun simctl install booted "$APP_PATH"
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      # The login can only succeed once the OS has validated the app's
+      # associated domains, which can take a while after install on these
+      # runners. Retry passively — reinstalling the app or restarting swcd
+      # discards the in-flight validation and restarts the race (observed in
+      # earlier runs), so between attempts: just wait.
+      - name: Run smoke flow
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            maestro test e2e/maestro/mock-login.yaml && exit 0
+            echo "Attempt $attempt failed — waiting for associated-domains validation to settle..."
+            sleep 45
+          done
+          exit 1
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          echo "=== /etc/hosts ==="
+          cat /etc/hosts || true
+          echo "=== Runner DNS for the Apple AASA CDN ==="
+          dscacheutil -q host -a name app-site-association.cdn-apple.com || true
+          echo "=== AASA reachability from the runner ==="
+          curl -sv --max-time 15 "https://app-site-association.cdn-apple.com/a/v1/samples.criipto.id" -o /dev/null 2>&1 | tail -n 5 || true
+          curl -sv --max-time 15 "https://samples.criipto.id/.well-known/apple-app-site-association" -o /dev/null 2>&1 | tail -n 5 || true
+          echo "=== swcd log: samples.criipto.id ==="
+          xcrun simctl spawn booted log show --last 60m --info --debug \
+            --predicate 'process == "swcd"' 2>/dev/null | grep -ai "criipto" | tail -n 120 || true
+          echo "=== swcd log: errors ==="
+          xcrun simctl spawn booted log show --last 60m --info --debug \
+            --predicate 'process == "swcd"' 2>/dev/null | grep -aE "SWCERR|Error|denied" | tail -n 60 || true
+
+      - name: Upload Maestro debug output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-debug-ios
+          path: ~/.maestro/tests/
+          if-no-files-found: ignore
+
+  android:
+    name: Android smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Enable KVM for emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Build and pack the library
+        run: |
+          npm ci
+          npm run pack
+
+      - name: Install example deps and overlay the packed library
+        working-directory: example
+        run: |
+          npm ci
+          npm install ../criipto-verify-expo-*.tgz --no-save
+
+      - name: Prebuild Android project
+        working-directory: example
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Assemble release APK
+        working-directory: example/android
+        run: ./gradlew assembleRelease
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Boot emulator and run smoke flow
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: |
+            adb install example/android/app/build/outputs/apk/release/app-release.apk
+            maestro test --include-tags=ci-setup e2e/maestro
+            maestro test e2e/maestro/mock-login.yaml
+
+      - name: Upload Maestro debug output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-debug-android
+          path: ~/.maestro/tests/
+          if-no-files-found: ignore
