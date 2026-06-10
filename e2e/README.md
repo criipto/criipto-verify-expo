@@ -35,7 +35,10 @@ npx expo run:android  --variant release
 Then invoke maestro:
 
 ```bash
-maestro test e2e/maestro
+maestro test --exclude-tags=ci-setup e2e/maestro
 ```
+
+Flows tagged `ci-setup` (e.g. dismissing Chrome's first-run dialogs) are only
+needed on the fresh emulators CI boots; `--exclude-tags` skips them locally.
 
 Currently, e2e tests can only run on android, since maestro does not work well with physical iOS devices.

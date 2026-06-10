@@ -1,0 +1,30 @@
+# Fresh CI emulators ship Chrome with its first-run experience pending, and
+# Chrome blocks any Custom Tab behind it until it is dismissed. CI runs this
+# flow (via its ci-setup tag) before the login flows; it is not part of the
+# regular suite.
+appId: com.android.chrome
+tags:
+  - ci-setup
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
+- runFlow:
+    when:
+      visible: "Accept & continue"
+    commands:
+      - tapOn: "Accept & continue"
+      - waitForAnimationToEnd:
+          timeout: 10000
+- runFlow:
+    when:
+      visible: "Use without an account"
+    commands:
+      - tapOn: "Use without an account"
+      - waitForAnimationToEnd:
+          timeout: 10000
+- runFlow:
+    when:
+      visible: "No thanks"
+    commands:
+      - tapOn: "No thanks"
