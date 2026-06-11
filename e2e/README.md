@@ -38,4 +38,26 @@ Then invoke maestro:
 maestro test e2e/maestro
 ```
 
-Currently, e2e tests can only run on android, since maestro does not work well with physical iOS devices.
+Currently, local e2e tests can only run on android, since maestro does not work well with physical iOS devices.
+
+## Running on CI (EAS Workflows)
+
+The [`e2e` workflow](../example/.eas/workflows/e2e.yml) builds the example app
+on [EAS Build](https://docs.expo.dev/build/introduction/) (iOS simulator build
+and Android APK) and runs `mock-login.yaml` on EAS-managed simulators/emulators
+via the [`maestro` job](https://docs.expo.dev/eas/workflows/examples/e2e-tests/).
+Only the mock flow runs on CI — the other flows need eID authenticator apps on
+physical devices.
+
+The build uses the `e2e-test` profile in [`eas.json`](../example/eas.json), and
+an `eas-build-post-install` hook overlays the locally packed library before
+prebuild (the same tarball overlay described in
+[DEVELOPING.md](../DEVELOPING.md)), so CI tests the checked-out library code,
+not the published package.
+
+Trigger manually with:
+
+```bash
+cd example
+eas workflow:run .eas/workflows/e2e.yml
+```
