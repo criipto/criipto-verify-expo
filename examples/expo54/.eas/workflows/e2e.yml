@@ -27,11 +27,11 @@ jobs:
     type: maestro
     params:
       build_id: ${{ needs.build_ios.outputs.build_id }}
-      flow_path: ["../e2e/maestro/mock-login.yaml"]
+      flow_path: ["../../e2e/maestro/mock-login.yaml"]
   test_android:
     name: Maestro (Android)
     needs: [build_android]
     type: maestro
     params:
       build_id: ${{ needs.build_android.outputs.build_id }}
-      flow_path: ["../e2e/maestro/mock-login.yaml"]
+      flow_path: ["../../e2e/maestro/mock-login.yaml"]
