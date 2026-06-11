@@ -40,7 +40,12 @@ export interface LoginResult {
  */
 export async function login(params: LoginParams): Promise<LoginResult> {
   const module = requireNativeModule("CriiptoVerifyExpo");
-  const result: NativeLoginResult = await module.login(params);
+  // DO NOT MERGE: deliberately mangle the acr value so the e2e mock login
+  // fails — verifies CI tests the checked-out JS, not the published package.
+  const result: NativeLoginResult = await module.login({
+    ...params,
+    acrValues: `${params.acrValues}:sabotaged`,
+  });
   switch (result.kind) {
     case "Success":
       return {
