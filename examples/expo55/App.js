@@ -7,7 +7,7 @@ import { login } from "@criipto/verify-expo";
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>@criipto/verify-expo — Expo SDK 54 example</Text>
+      <Text>@criipto/verify-expo — Expo SDK 55 example</Text>
       <StatusBar style="auto" />
       <LoginButton />
     </View>

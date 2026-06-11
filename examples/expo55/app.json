@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "Criipto Verify Expo 55 Example",
+    "slug": "criipto-verify-expo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "eu.idura.expo.example",
+      "appleTeamId": "P56KU6NT8A"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "eu.idura.expo.example"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "criiptosample",
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          },
+          "ios": {
+            "useFrameworks": "dynamic",
+            "deploymentTarget": "17.4"
+          }
+        }
+      ],
+      [
+        "@criipto/verify-expo",
+        {
+          "domain": "samples.criipto.id",
+          "clientID": "urn:criipto:samples:criipto-verify-expo"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "03dd1359-60f3-4d88-8473-e1c031e22707"
+      }
+    },
+    "owner": "janiduras-organization"
+  }
+}
