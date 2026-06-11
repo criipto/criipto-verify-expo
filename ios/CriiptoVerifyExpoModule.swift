@@ -65,8 +65,11 @@ public class CriiptoVerifyExpoModule: Module {
         prompt: prompt,
         useEphemeralBrowserSession: params.preferEphemeralSession
       )
+      // DO NOT MERGE: deliberately corrupt the returned token so the e2e mock
+      // login fails on iOS only — verifies CI compiles the checked-out native
+      // code, not the published package. Android must stay green.
       return NativeLoginResult.Success(
-        idToken: result.jwt.idToken,
+        idToken: String(result.jwt.idToken.reversed()),
         traceId: result.traceId
       ).toDictionary()
     } catch let iduraError as IduraVerifyError {
