@@ -4,5 +4,18 @@ appId: eu.idura.expo.example
     clearState: true
 - assertVisible: "Login with Mock"
 - tapOn: "Login with Mock"
-- assertVisible: "Logged in!"
+# If iOS shows the "... Wants to Use criipto.id to Sign In" consent alert
+# before opening the browser session, pass it; with ephemeral sessions no
+# alert appears and this is skipped.
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+# The browser round-trip can outlast the default assertion wait on cold CI
+# simulators.
+- extendedWaitUntil:
+    visible: "Logged in!"
+    timeout: 60000
 - assertVisible: '.*"identityscheme": "mock".*'

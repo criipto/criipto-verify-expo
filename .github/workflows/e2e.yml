@@ -1,0 +1,24 @@
+name: e2e
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Forked PRs cannot read the EXPO_TOKEN secret, so only run for same-repo events.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+      - run: npm install --global eas-cli
+      - name: Run the EAS e2e workflow
+        run: eas workflow:run .eas/workflows/e2e.yml --wait --non-interactive
+        working-directory: example
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
