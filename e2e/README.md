@@ -55,6 +55,13 @@ prebuild (the same tarball overlay described in
 [DEVELOPING.md](../DEVELOPING.md)), so CI tests the checked-out library code,
 not the published package.
 
+The [GitHub Actions `e2e` workflow](../.github/workflows/e2e.yml) starts the
+EAS workflow on pull requests and pushes to master with `eas workflow:run`
+(uploading the local checkout) and gates on its result. The repo is
+deliberately **not** linked to the Expo GitHub app; authentication uses the
+`EXPO_TOKEN` repository secret. Forked PRs cannot read the secret, so the job
+only runs for same-repo events.
+
 Trigger manually with:
 
 ```bash
