@@ -12,19 +12,18 @@
   },
   "peerDependencies": {
     "expo": ">=54",
-    "expo-modules-core": ">=3",
     "react": ">=19",
     "react-native": ">=0.81"
   },
   "devDependencies": {
     "@types/react": "^19.1.9",
     "@types/react-native": "^0.72.2",
-    "expo-modules-core": "^55.0.25",
+    "expo": "^54.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "publint": "^0.3.20",
-    "react-native": "^0.79.6",
+    "react-native": "^0.81.0",
     "tsdown": "^0.22.0",
     "typescript": "^5.1.6"
   },
