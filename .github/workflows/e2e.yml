@@ -16,11 +16,9 @@ jobs:
     steps:
       - id: pick
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo 'examples=["expo56"]' >> "$GITHUB_OUTPUT"
-          else
-            echo 'examples=["expo54","expo55","expo56"]' >> "$GITHUB_OUTPUT"
-          fi
+          # TEMP (drop before merge): force the full matrix on PRs to verify all
+          # three SDKs build and test on EAS. Revert to the event-based pick.
+          echo 'examples=["expo54","expo55","expo56"]' >> "$GITHUB_OUTPUT"
   e2e:
     needs: setup
     runs-on: ubuntu-latest
