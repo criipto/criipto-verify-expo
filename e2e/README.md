@@ -20,14 +20,14 @@ before `expo prebuild` — see [DEVELOPING.md](../DEVELOPING.md):
 
 ```bash
 npm run build && npm run pack       # in the repo root
-cd example
-npm install ../criipto-verify-expo-*.tgz --no-save
+cd examples/expo56                  # or expo54 / expo55
+npm install ../../criipto-verify-expo-*.tgz --no-save
 ```
 
 Build and install the example app on your simulator/emulator first:
 
 ```bash
-cd example
+cd examples/expo56       # or expo54 / expo55
 npx expo prebuild        # one-off; generates ios/ and android/
 npx expo run:android  --variant release
 ```
@@ -42,29 +42,31 @@ Currently, local e2e tests can only run on android, since maestro does not work 
 
 ## Running on CI (EAS Workflows)
 
-The [`e2e` workflow](../example/.eas/workflows/e2e.yml) builds the example app
-on [EAS Build](https://docs.expo.dev/build/introduction/) (iOS simulator build
+The [`e2e` workflow](../examples/expo56/.eas/workflows/e2e.yml) builds an example
+app on [EAS Build](https://docs.expo.dev/build/introduction/) (iOS simulator build
 and Android APK) and runs `mock-login.yaml` on EAS-managed simulators/emulators
 via the [`maestro` job](https://docs.expo.dev/eas/workflows/examples/e2e-tests/).
 Only the mock flow runs on CI — the other flows need eID authenticator apps on
 physical devices.
 
-The build uses the `e2e-test` profile in [`eas.json`](../example/eas.json), and
-an `eas-build-post-install` hook overlays the locally packed library before
+The build uses the `e2e-test` profile in [`eas.json`](../examples/expo56/eas.json),
+and an `eas-build-post-install` hook overlays the locally packed library before
 prebuild (the same tarball overlay described in
 [DEVELOPING.md](../DEVELOPING.md)), so CI tests the checked-out library code,
 not the published package.
 
-The [GitHub Actions `e2e` workflow](../.github/workflows/e2e.yml) starts the
-EAS workflow on pull requests and pushes to master with `eas workflow:run`
-(uploading the local checkout) and gates on its result. The repo is
-deliberately **not** linked to the Expo GitHub app; authentication uses the
-`EXPO_TOKEN` repository secret. Forked PRs cannot read the secret, so the job
+The [GitHub Actions `e2e` workflow](../.github/workflows/e2e.yml) starts the EAS
+workflow with `eas workflow:run` (uploading the local checkout) and gates on its
+result. To keep EAS build minutes in check, pull requests run only the latest
+example (`examples/expo56`); pushes to master run the full
+`expo54`/`expo55`/`expo56` matrix, so an SDK regression is caught on merge. The
+repo is deliberately **not** linked to the Expo GitHub app; authentication uses
+the `EXPO_TOKEN` repository secret. Forked PRs cannot read the secret, so the job
 only runs for same-repo events.
 
 Trigger manually with:
 
 ```bash
-cd example
+cd examples/expo56       # or expo54 / expo55
 eas workflow:run .eas/workflows/e2e.yml
 ```
