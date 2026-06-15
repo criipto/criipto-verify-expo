@@ -6,11 +6,31 @@ on:
 permissions:
   contents: read
 jobs:
+  # Pull requests gate on the latest SDK only to keep EAS build minutes in
+  # check; pushes to master run the full matrix so a regression on an older or
+  # newer supported SDK is caught on merge.
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      examples: ${{ steps.pick.outputs.examples }}
+    steps:
+      - id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo 'examples=["expo56"]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'examples=["expo54","expo55","expo56"]' >> "$GITHUB_OUTPUT"
+          fi
   e2e:
+    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 45
     # Forked PRs cannot read the EXPO_TOKEN secret, so only run for same-repo events.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    strategy:
+      fail-fast: false
+      matrix:
+        example: ${{ fromJSON(needs.setup.outputs.examples) }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -19,6 +39,6 @@ jobs:
       - run: npm install --global eas-cli
       - name: Run the EAS e2e workflow
         run: eas workflow:run .eas/workflows/e2e.yml --wait --non-interactive
-        working-directory: example
+        working-directory: examples/${{ matrix.example }}
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

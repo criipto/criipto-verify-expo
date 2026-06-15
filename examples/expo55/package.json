@@ -1,5 +1,5 @@
 {
-  "name": "example",
+  "name": "example-expo55",
   "version": "2.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -7,15 +7,15 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "eas-build-post-install": "cd .. && npm ci --ignore-scripts && npm run pack && cd example && npm install ../criipto-verify-expo-*.tgz --no-save"
+    "eas-build-post-install": "cd ../.. && npm ci --ignore-scripts && npm run pack && cd examples/expo55 && npm install ../../criipto-verify-expo-*.tgz --no-save"
   },
   "dependencies": {
     "@criipto/verify-expo": "^4.0.0-2",
-    "expo": "~54.0.33",
-    "expo-build-properties": "~1.0.10",
-    "expo-status-bar": "~3.0.9",
-    "react": "19.1.0",
-    "react-native": "0.81.5"
+    "expo": "~55.0.26",
+    "expo-build-properties": "~55.0.14",
+    "expo-status-bar": "~55.0.6",
+    "react": "19.2.0",
+    "react-native": "0.83.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
