@@ -87,5 +87,5 @@ dependencies {
   implementation "androidx.core:core-ktx:1.7.0"
   implementation "androidx.appcompat:appcompat:1.6.1"
 
-  implementation "eu.idura:verify:2.0.1-beta.0"
+  implementation "eu.idura:verify:2.0.1"
 }
