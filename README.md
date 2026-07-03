@@ -1,7 +1,8 @@
 # criipto-verify-expo
 
-Accept MitID, NemID, Swedish BankID, Norwegian BankID and more logins in your Expo (React-Native) app with @criipto/verify-expo.
-The SDK supports app switching for Swedish BankID, FrejaID, and Danish MitID on both iOS and Android.
+The Idura Verify Expo SDK allows your users to authenticate with a host of European eID providers. It allows your application to act as a [_public client_](https://docs.idura.app/verify/getting-started/glossary/#public-clients), meaning it does not use a client secret, but instead employs [PKCE](https://docs.idura.app/verify/getting-started/glossary/#pkce-proof-key-for-code-exchange) to ensure that a malicious actor cannot intercept the authorization code.
+
+In addition to the basic OIDC flow, the SDK also supports [app switching](https://docs.idura.app/verify/guides/appswitch/).
 
 ## Requirements
 
