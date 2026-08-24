@@ -1,4 +1,4 @@
-export { login } from "./CriiptoVerifyExpoModule";
+export { login, warmUp } from "./CriiptoVerifyExpoModule";
 export type { LoginParams, LoginResult } from "./CriiptoVerifyExpoModule";
 export type { Action, AcrValues, Claims, Prompt } from "./types";
 export {

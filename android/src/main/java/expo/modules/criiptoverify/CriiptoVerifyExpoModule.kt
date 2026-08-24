@@ -1,6 +1,7 @@
 package expo.modules.criiptoverify
 
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.activity.ComponentActivity
 import eu.idura.verify.IduraVerify
 import eu.idura.verify.Prompt
@@ -17,6 +18,8 @@ import eu.idura.verify.IduraVerifyInternalException as SdkInternalException
 import eu.idura.verify.NoSuitableBrowserException as SdkNoSuitableBrowserException
 import eu.idura.verify.OAuthException as SdkOAuthException
 import eu.idura.verify.UserCancelledException as SdkUserCancelledException
+
+private const val TAG = "CriiptoVerifyExpo"
 
 private const val META_DOMAIN = "criipto.verify.domain"
 private const val META_CLIENT_ID = "criipto.verify.clientId"
@@ -76,6 +79,12 @@ class CriiptoVerifyExpoModule : Module() {
         }
       }
 
+      // The body is attached by reference, with an explicit type argument, rather than in the
+      // infix `Coroutine { ... }` form `login` uses below: for a zero-argument body the zero-arg
+      // and one-arg `Coroutine` overloads are ambiguous (a bare lambda could still take an
+      // implicit `it`), and ktlint deletes the `{ -> }` that would disambiguate it.
+      AsyncFunction("warmUp").Coroutine<Unit>(this@CriiptoVerifyExpoModule::warmUp)
+
       AsyncFunction("login") Coroutine
         { params: LoginParams ->
           return@Coroutine try {
@@ -118,6 +127,18 @@ class CriiptoVerifyExpoModule : Module() {
           }
         }
     }
+
+  /**
+   * Optional warm-up. Constructing the SDK prefetches the OIDC configuration and JWKS and scans for
+   * a usable browser, work that otherwise lands on the first login. Silent by design: `login()`
+   * builds the SDK the same way and reports a real misconfiguration to the caller, so there is
+   * nothing here a consumer has to handle. Still logged, because a warm-up that quietly does
+   * nothing is otherwise invisible while developing an integration.
+   */
+  private suspend fun warmUp() {
+    runCatching { withContext(Dispatchers.Main) { ensureSdk() } }
+      .onFailure { Log.w(TAG, "warmUp() could not build the SDK", it) }
+  }
 
   /**
    * Builds the SDK on first use, mirroring the iOS module's `ensureSdk()`. Must run on the main
