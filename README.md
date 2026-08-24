@@ -101,6 +101,21 @@ export default function LoginButton() {
 
 On failure `login()` throws a typed error: `UserCancelledError` for the user dismissing the flow, `OAuth2Error` for IdP errors, `NoSuitableBrowserError` (Android-only) when no Custom Tab-capable browser is installed, plus `ModuleNotConfiguredError` / `UnknownPromptError` / `IduraVerifyInternalError`. All carry the SDK's `trace_id` where available, for correlation in the Idura dashboard.
 
+## Warming up
+
+The native SDK is built on the first `login()` call, which is when OIDC discovery, the JWKS fetch and — on Android — the scan for a usable browser happen. To take that off the login path, call `warmUp()` from an effect on the screen that logs in:
+
+```ts
+import { useEffect } from "react";
+import { warmUp } from "@criipto/verify-expo";
+
+useEffect(() => {
+  warmUp();
+}, []);
+```
+
+It is entirely optional, never throws, and is cheap to call more than once. Because it reports nothing, a misconfigured app still fails at `login()` with `ModuleNotConfiguredError` — the native side logs the reason under the `CriiptoVerifyExpo` tag (logcat) or via `NSLog`, so you can see it while wiring up an integration.
+
 ## Ephemeral sessions (iOS only)
 
 The web view used to display the login page lets you choose between an ephemeral or a shared browser session.

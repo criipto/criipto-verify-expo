@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Button } from "react-native";
 
-import { login } from "@criipto/verify-expo";
+import { login, warmUp } from "@criipto/verify-expo";
 
 export default function App() {
   return (
@@ -17,6 +17,11 @@ export default function App() {
 function LoginButton() {
   const [claims, setClaims] = useState(null);
   const [error, setError] = useState(null);
+
+  // Optional: builds the native SDK now rather than on the first login.
+  useEffect(() => {
+    warmUp();
+  }, []);
 
   const handlePress = async (acrValues) => {
     try {

@@ -126,8 +126,8 @@ const withAndroidConfig: ConfigPlugin<{ domain: string; clientID: string }> = (
 
     const application = getMainApplicationOrThrow(config.modResults);
 
-    // <meta-data> entries so CriiptoVerifyPackage can read domain + clientID at host-Activity
-    // onCreate time, without the module having to round-trip them through JavaScript.
+    // <meta-data> entries so the module can read domain + clientID when it builds the SDK,
+    // without having to round-trip them through JavaScript.
     addMetaDataItemToMainApplication(application, META_DOMAIN, domain);
     addMetaDataItemToMainApplication(application, META_CLIENT_ID, clientID);
     // Override the SDK's templated RedirectUriReceiverActivity intent-filter with one where

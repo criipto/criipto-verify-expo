@@ -30,6 +30,21 @@ export interface LoginResult {
 }
 
 /**
+ * Optionally builds the native SDK ahead of the first `login()`, which moves OIDC discovery, the
+ * JWKS fetch and (on Android) the browser scan off the login path. Entirely optional — `login()`
+ * builds the SDK itself when it has to.
+ *
+ * Best effort: it never throws and reports nothing. A real misconfiguration surfaces from
+ * `login()` as usual; the native side logs the reason (`CriiptoVerifyExpo` in logcat, `NSLog` on
+ * iOS) so it is visible while developing an integration. Idempotent, and cheap once warm, so
+ * calling it from an effect on the screen that logs in is fine.
+ */
+export async function warmUp(): Promise<void> {
+  const module = requireNativeModule("CriiptoVerifyExpo");
+  await module.warmUp();
+}
+
+/**
  * Delegates to the native Idura Verify SDK on both iOS and Android. The native
  * code handles OIDC discovery, PKCE, the browser flow (ASWebAuthenticationSession
  * on iOS, Auth Tab / Custom Tab on Android), app switching for MitID/BankID, and

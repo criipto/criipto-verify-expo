@@ -46,6 +46,21 @@ public class CriiptoVerifyExpoModule: Module {
     AsyncFunction("login") { (params: LoginParams) async -> [String: Any] in
       await self.performLogin(params)
     }
+
+    // Optional warm-up; see the Android module for the rationale. Silent by design — `login()`
+    // builds the SDK the same way and reports a real misconfiguration to the caller.
+    AsyncFunction("warmUp") { () async in
+      await self.warmUp()
+    }
+  }
+
+  @MainActor
+  private func warmUp() {
+    do {
+      _ = try ensureSdk()
+    } catch {
+      NSLog("[CriiptoVerifyExpo] warmUp() could not build the SDK: \(error.localizedDescription)")
+    }
   }
 
   // Pinned to the main actor because `ensureSdk()` constructs an `IduraVerify`
