@@ -1,5 +1,8 @@
 name: check
-on: push
+on:
+  push:
+    branches: ["master"]
+  pull_request:
 permissions:
   contents: read
   id-token: write
