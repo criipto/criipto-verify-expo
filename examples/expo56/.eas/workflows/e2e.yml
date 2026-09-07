@@ -35,3 +35,12 @@ jobs:
     params:
       build_id: ${{ needs.build_android.outputs.build_id }}
       flow_path: ["../../e2e/maestro/mock-login.yaml"]
+      device_identifier: pixel_9
+      android_system_image_package: "system-images;android-36;google_apis_playstore;x86_64"
+    hooks:
+      before_maestro_tests:
+        - name: Skip Chrome's first-run experience
+          run: |
+            adb shell 'echo "_ --disable-fre --no-first-run --no-default-browser-check" > /data/local/tmp/chrome-command-line'
+            adb shell chmod 0644 /data/local/tmp/chrome-command-line
+            adb shell am set-debug-app --persistent com.android.chrome
