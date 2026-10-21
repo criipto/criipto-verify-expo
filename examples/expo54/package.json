@@ -10,7 +10,7 @@
     "eas-build-post-install": "cd ../.. && npm ci --ignore-scripts && npm run pack && cd examples/expo54 && npm install ../../criipto-verify-expo-*.tgz --no-save"
   },
   "dependencies": {
-    "@criipto/verify-expo": "^4.0.0-2",
+    "@criipto/verify-expo": "^4.0.2",
     "expo": "~54.0.35",
     "expo-build-properties": "~1.0.10",
     "expo-status-bar": "~3.0.9",
