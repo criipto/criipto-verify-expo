@@ -101,6 +101,10 @@ public class CriiptoVerifyExpoModule: Module {
       case .internalError(let message, _, let traceId):
         return NativeLoginResult.InternalError(message: message, traceId: traceId).toDictionary()
       }
+    } catch let config as IduraVerifyConfigurationError {
+      return NativeLoginResult.ModuleNotConfigured(
+        message: config.localizedDescription
+      ).toDictionary()
     } catch let preflight as ModuleNotConfiguredError {
       return NativeLoginResult.ModuleNotConfigured(message: preflight.message).toDictionary()
     } catch let preflight as UnknownPromptError {
@@ -121,7 +125,7 @@ public class CriiptoVerifyExpoModule: Module {
     guard let clientId = info[INFO_PLIST_CLIENT_ID_KEY] as? String, !clientId.isEmpty else {
       throw ModuleNotConfiguredError(message: missingInfoPlistKeyMessage(INFO_PLIST_CLIENT_ID_KEY))
     }
-    iduraVerify = IduraVerify(clientId: clientId, domain: domain)
+    iduraVerify = try IduraVerify(clientId: clientId, domain: domain)
     return iduraVerify!
   }
 

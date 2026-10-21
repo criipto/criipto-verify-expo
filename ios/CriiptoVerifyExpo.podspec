@@ -39,7 +39,7 @@ Pod::Spec.new do |s|
   end
   spm_dependency(s,
     url: 'https://github.com/criipto/idura-verify-ios',
-    requirement: { kind: 'upToNextMajorVersion', minimumVersion: '2.0.1' },
+    requirement: { kind: 'upToNextMajorVersion', minimumVersion: '3.0.1' },
     products: ['IduraVerify']
   )
 end
