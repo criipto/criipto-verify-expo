@@ -72,3 +72,8 @@ upload. The `eas-build-post-install` hook in each example's `package.json`
 therefore repeats the overlay on the worker: it packs the library at the repo
 root and installs the tarball into the example, so EAS builds (and the
 [e2e workflow](e2e/README.md)) test the checked-out library code.
+
+On iOS the hook runs after EAS has already run `pod install`, against the
+published package's podspec. The hook therefore runs `pod install` again, or a
+change to the podspec's native dependencies (such as the Idura Verify SDK
+version) would be built against the old dependency.
