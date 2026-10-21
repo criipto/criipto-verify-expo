@@ -7,7 +7,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "eas-build-post-install": "cd ../.. && npm ci --ignore-scripts && npm run pack && cd examples/expo56 && npm install ../../criipto-verify-expo-*.tgz --no-save"
+    "eas-build-post-install": "cd ../.. && npm ci --ignore-scripts && npm run pack && cd examples/expo56 && npm install ../../criipto-verify-expo-*.tgz --no-save && if [ \"$EAS_BUILD_PLATFORM\" = ios ]; then (cd ios && pod install); fi"
   },
   "dependencies": {
     "@criipto/verify-expo": "^4.0.2",
