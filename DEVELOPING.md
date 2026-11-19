@@ -11,7 +11,7 @@ example apps under `examples/`.
 
 ## Testing changes in the example apps
 
-The example apps live under `examples/` — `expo54`, `expo55`, and `expo56`, each
+The example apps live under `examples/` — `expo54` through `expo58`, each
 pinned to that Expo SDK and its own lockfile. They depend on the **published**
 `@criipto/verify-expo` from npm, so each builds and runs on its own (a fresh
 clone, CI, the Maestro smoke tests). To test **unpublished** local changes you
@@ -48,9 +48,9 @@ autolinking resolves `expo-modules-core` from the example's own SDK install.
 # repo root — build and pack the library
 npm run pack                       # → criipto-verify-expo-<version>.tgz
 
-# pick an example (expo56 is the latest; substitute expo54/expo55 to
+# pick an example (expo58 is the latest; substitute expo54 to expo57 to
 # reproduce an SDK-specific issue) and overlay the packed build
-cd examples/expo56
+cd examples/expo58
 npm ci
 npm install ../../criipto-verify-expo-*.tgz --no-save
 npx expo prebuild                  # regenerate android/ + ios/
