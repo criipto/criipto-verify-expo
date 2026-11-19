@@ -14,6 +14,7 @@ export default defineConfig([
     outDir: "plugin/build",
     format: "cjs",
     platform: "node",
+    deps: { neverBundle: [/^expo(\/|$)/] },
     dts: false,
     sourcemap: true,
   },

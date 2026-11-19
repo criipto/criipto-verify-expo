@@ -1,7 +1,7 @@
 # Maestro smoke tests for the example app, on EAS-managed simulators/emulators.
-# The example builds against the PR's library code: an eas-build-post-install
-# hook in package.json packs the repo-root library and overlays it before
-# prebuild (see DEVELOPING.md).
+# The example builds against the PR's library code: an eas-build-pre-install
+# hook in package.json packs the repo-root library and pins the example to it
+# before EAS installs dependencies (see DEVELOPING.md).
 #
 # No `on:` triggers — the repo is intentionally not linked to the Expo GitHub
 # app. GitHub Actions starts this workflow with `eas workflow:run` (see

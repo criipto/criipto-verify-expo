@@ -11,7 +11,7 @@ example apps under `examples/`.
 
 ## Testing changes in the example apps
 
-The example apps live under `examples/` — `expo54`, `expo55`, and `expo56`, each
+The example apps live under `examples/` — `expo54` through `expo58`, each
 pinned to that Expo SDK and its own lockfile. They depend on the **published**
 `@criipto/verify-expo` from npm, so each builds and runs on its own (a fresh
 clone, CI, the Maestro smoke tests). To test **unpublished** local changes you
@@ -48,9 +48,9 @@ autolinking resolves `expo-modules-core` from the example's own SDK install.
 # repo root — build and pack the library
 npm run pack                       # → criipto-verify-expo-<version>.tgz
 
-# pick an example (expo56 is the latest; substitute expo54/expo55 to
+# pick an example (expo58 is the latest; substitute expo54 to expo57 to
 # reproduce an SDK-specific issue) and overlay the packed build
-cd examples/expo56
+cd examples/expo58
 npm ci
 npm install ../../criipto-verify-expo-*.tgz --no-save
 npx expo prebuild                  # regenerate android/ + ios/
@@ -66,14 +66,13 @@ Re-run `npm run pack` and the overlay install after each library change.
 
 ### On EAS Build
 
-EAS workers reinstall the example's dependencies from its lockfile, which points
-at the published package — a locally overlaid tarball does not survive the
-upload. The `eas-build-post-install` hook in each example's `package.json`
-therefore repeats the overlay on the worker: it packs the library at the repo
-root and installs the tarball into the example, so EAS builds (and the
-[e2e workflow](e2e/README.md)) test the checked-out library code.
-
-On iOS the hook runs after EAS has already run `pod install`, against the
-published package's podspec. The hook therefore runs `pod install` again, or a
-change to the podspec's native dependencies (such as the Idura Verify SDK
-version) would be built against the old dependency.
+EAS workers install the example's dependencies with `npm ci` from its lockfile,
+which points at the published package, so a locally overlaid tarball does not
+survive the upload. Installing the tarball after `npm ci` is too late: EAS reads
+the app config (which runs the config plugin) and, on iOS, runs prebuild and
+`pod install` before the post-install hook. The `eas-build-pre-install` hook in
+each example's `package.json` therefore packs the library at the repo root and
+repoints the example's `package.json` and lockfile at the tarball
+(`npm install --package-lock-only`). EAS's own `npm ci` then installs the
+checked-out library code, and every later step, including the
+[e2e workflow](e2e/README.md), uses it.
