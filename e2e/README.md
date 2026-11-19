@@ -50,10 +50,9 @@ Only the mock flow runs on CI — the other flows need eID authenticator apps on
 physical devices.
 
 The build uses the `e2e-test` profile in [`eas.json`](../examples/expo56/eas.json),
-and an `eas-build-post-install` hook overlays the locally packed library before
-prebuild (the same tarball overlay described in
-[DEVELOPING.md](../DEVELOPING.md)), so CI tests the checked-out library code,
-not the published package.
+and an `eas-build-pre-install` hook pins the example to the locally packed
+library before EAS installs dependencies (see [DEVELOPING.md](../DEVELOPING.md)),
+so CI tests the checked-out library code, not the published package.
 
 The [GitHub Actions `e2e` workflow](../.github/workflows/e2e.yml) starts the EAS
 workflow with `eas workflow:run` (uploading the local checkout) and gates on its
