@@ -1,0 +1,46 @@
+# Maestro smoke tests for the example app, on EAS-managed simulators/emulators.
+# The example builds against the PR's library code: an eas-build-pre-install
+# hook in package.json packs the repo-root library and pins the example to it
+# before EAS installs dependencies (see DEVELOPING.md).
+#
+# No `on:` triggers — the repo is intentionally not linked to the Expo GitHub
+# app. GitHub Actions starts this workflow with `eas workflow:run` (see
+# .github/workflows/e2e.yml), which uploads the local checkout.
+name: e2e
+
+jobs:
+  build_ios:
+    name: Build iOS simulator app
+    type: build
+    params:
+      platform: ios
+      profile: e2e-test
+  build_android:
+    name: Build Android apk
+    type: build
+    params:
+      platform: android
+      profile: e2e-test
+  test_ios:
+    name: Maestro (iOS)
+    needs: [build_ios]
+    type: maestro
+    params:
+      build_id: ${{ needs.build_ios.outputs.build_id }}
+      flow_path: ["../../e2e/maestro/mock-login.yaml"]
+  test_android:
+    name: Maestro (Android)
+    needs: [build_android]
+    type: maestro
+    params:
+      build_id: ${{ needs.build_android.outputs.build_id }}
+      flow_path: ["../../e2e/maestro/mock-login.yaml"]
+      device_identifier: pixel_9
+      android_system_image_package: "system-images;android-36;google_apis_playstore;x86_64"
+    hooks:
+      before_maestro_tests:
+        - name: Skip Chrome's first-run experience
+          run: |
+            adb shell 'echo "_ --disable-fre --no-first-run --no-default-browser-check" > /data/local/tmp/chrome-command-line'
+            adb shell chmod 0644 /data/local/tmp/chrome-command-line
+            adb shell am set-debug-app --persistent com.android.chrome
