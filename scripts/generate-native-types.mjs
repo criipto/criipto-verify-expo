@@ -93,6 +93,7 @@ function describeVariant(variantType, node) {
     return {
       name: sym.name,
       optional: optionalModifier || nullableType,
+      array: checker.isArrayType(propType),
       literalValue: propType.isStringLiteral() ? propType.value : null,
     };
   });
@@ -130,9 +131,10 @@ function renderKotlin(u) {
   for (const v of variants) {
     const fields = [`@Field override var ${DISCRIMINATOR}: String = "${v.tag}"`];
     for (const p of v.payload) {
+      const type = p.array ? "List<String>" : "String";
       const suffix = p.optional ? "?" : "";
-      const init = p.optional ? "null" : `""`;
-      fields.push(`@Field var ${p.name}: String${suffix} = ${init}`);
+      const init = p.optional ? "null" : p.array ? "emptyList()" : `""`;
+      fields.push(`@Field var ${p.name}: ${type}${suffix} = ${init}`);
     }
     lines.push(`  class ${v.tag} : ${u.name} {`);
     fields.forEach((f, i) => {
@@ -157,14 +159,14 @@ function renderSwift(u) {
     lines.push(`    @Field var ${DISCRIMINATOR}: String = "${v.tag}"`);
     for (const p of v.payload) {
       const suffix = p.optional ? "?" : "";
-      const init = p.optional ? "nil" : `""`;
-      lines.push(`    @Field var ${p.name}: String${suffix} = ${init}`);
+      const init = p.optional ? "nil" : p.array ? "[]" : `""`;
+      lines.push(`    @Field var ${p.name}: ${swiftType(p)}${suffix} = ${init}`);
     }
     lines.push("");
     lines.push(`    init() {}`);
     if (v.payload.length > 0) {
       const params = v.payload
-        .map((p) => `${p.name}: String${p.optional ? "? = nil" : ""}`)
+        .map((p) => `${p.name}: ${swiftType(p)}${p.optional ? "? = nil" : ""}`)
         .join(", ");
       lines.push("");
       lines.push(`    init(${params}) {`);
@@ -175,4 +177,8 @@ function renderSwift(u) {
   }
   lines.push(`}`);
   return lines.join("\n");
+}
+
+function swiftType(p) {
+  return p.array ? "[String]" : "String";
 }
