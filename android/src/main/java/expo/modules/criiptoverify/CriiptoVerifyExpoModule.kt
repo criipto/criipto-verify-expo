@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import eu.idura.verify.IduraVerifyInternalException as SdkInternalException
 import eu.idura.verify.NoSuitableBrowserException as SdkNoSuitableBrowserException
 import eu.idura.verify.OAuthException as SdkOAuthException
+import eu.idura.verify.RedirectVerificationFailedException as SdkRedirectVerificationFailedException
 import eu.idura.verify.UserCancelledException as SdkUserCancelledException
 
 private const val TAG = "CriiptoVerifyExpo"
@@ -105,6 +106,14 @@ class CriiptoVerifyExpoModule : Module() {
             NativeLoginResult.OAuthError().apply {
               error = e.error
               errorDescription = e.errorDescription
+              traceId = e.traceId
+            }
+          } catch (e: SdkRedirectVerificationFailedException) {
+            NativeLoginResult.RedirectVerificationFailed().apply {
+              message = e.message!!
+              redirectUri = e.redirectUri.toString()
+              packageName = e.packageName
+              signingCertificateFingerprints = e.signingCertificateFingerprints
               traceId = e.traceId
             }
           } catch (e: SdkInternalException) {

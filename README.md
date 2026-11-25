@@ -99,7 +99,7 @@ export default function LoginButton() {
 }
 ```
 
-On failure `login()` throws a typed error: `UserCancelledError` for the user dismissing the flow, `OAuth2Error` for IdP errors, `NoSuitableBrowserError` (Android-only) when no Custom Tab-capable browser is installed, plus `ModuleNotConfiguredError` / `UnknownPromptError` / `IduraVerifyInternalError`. All carry the SDK's `trace_id` where available, for correlation in the Idura dashboard.
+On failure `login()` throws a typed error: `UserCancelledError` for the user dismissing the flow, `OAuth2Error` for IdP errors, `NoSuitableBrowserError` (Android-only) when no Custom Tab-capable browser is installed, plus `ModuleNotConfiguredError` / `UnknownPromptError` / `IduraVerifyInternalError`. `RedirectVerificationFailedError` (Android-only, a subclass of `IduraVerifyInternalError`) means the browser could not verify through `https://<redirect host>/.well-known/assetlinks.json` that the app owns the redirect URI: that file has to list `package_name` with one of `signing_certificate_fingerprints`, the SHA-256 fingerprints of the installed build's signing keys. All carry the SDK's `trace_id` where available, for correlation in the Idura dashboard.
 
 ## Warming up
 

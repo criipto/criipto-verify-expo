@@ -6,6 +6,7 @@ export {
   ModuleNotConfiguredError,
   NoSuitableBrowserError,
   OAuth2Error,
+  RedirectVerificationFailedError,
   UnknownPromptError,
   UserCancelledError,
 } from "./types";

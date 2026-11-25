@@ -47,6 +47,20 @@ sealed interface NativeLoginResult : Record {
     @Field var traceId: String? = null
   }
 
+  class RedirectVerificationFailed : NativeLoginResult {
+    @Field override var kind: String = "RedirectVerificationFailed"
+
+    @Field var message: String = ""
+
+    @Field var redirectUri: String = ""
+
+    @Field var packageName: String = ""
+
+    @Field var signingCertificateFingerprints: List<String> = emptyList()
+
+    @Field var traceId: String? = null
+  }
+
   class ModuleNotConfigured : NativeLoginResult {
     @Field override var kind: String = "ModuleNotConfigured"
 

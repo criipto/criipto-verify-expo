@@ -54,6 +54,26 @@ export class IduraVerifyInternalError extends Error {
   }
 }
 
+export class RedirectVerificationFailedError extends IduraVerifyInternalError {
+  redirect_uri: string;
+  package_name: string;
+  signing_certificate_fingerprints: string[];
+
+  constructor(
+    message: string,
+    redirect_uri: string,
+    package_name: string,
+    signing_certificate_fingerprints: string[],
+    trace_id?: string,
+  ) {
+    super(message, trace_id);
+    this.name = "RedirectVerificationFailedError";
+    this.redirect_uri = redirect_uri;
+    this.package_name = package_name;
+    this.signing_certificate_fingerprints = signing_certificate_fingerprints;
+  }
+}
+
 export class ModuleNotConfiguredError extends Error {
   constructor(message: string) {
     super(message);

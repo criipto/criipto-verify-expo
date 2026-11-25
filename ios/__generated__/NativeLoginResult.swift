@@ -67,6 +67,25 @@ enum NativeLoginResult {
     }
   }
 
+  struct RedirectVerificationFailed: Record {
+    @Field var kind: String = "RedirectVerificationFailed"
+    @Field var message: String = ""
+    @Field var redirectUri: String = ""
+    @Field var packageName: String = ""
+    @Field var signingCertificateFingerprints: [String] = []
+    @Field var traceId: String? = nil
+
+    init() {}
+
+    init(message: String, redirectUri: String, packageName: String, signingCertificateFingerprints: [String], traceId: String? = nil) {
+      self.message = message
+      self.redirectUri = redirectUri
+      self.packageName = packageName
+      self.signingCertificateFingerprints = signingCertificateFingerprints
+      self.traceId = traceId
+    }
+  }
+
   struct ModuleNotConfigured: Record {
     @Field var kind: String = "ModuleNotConfigured"
     @Field var message: String = ""
