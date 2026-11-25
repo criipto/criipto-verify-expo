@@ -5,6 +5,7 @@ import {
   Action,
   Claims,
   IduraVerifyInternalError,
+  LoginAlreadyInProgressError,
   ModuleNotConfiguredError,
   NoSuitableBrowserError,
   OAuth2Error,
@@ -68,6 +69,8 @@ export async function login(params: LoginParams): Promise<LoginResult> {
       throw new UserCancelledError(result.traceId ?? undefined);
     case "NoSuitableBrowser":
       throw new NoSuitableBrowserError(result.traceId ?? undefined);
+    case "LoginAlreadyInProgress":
+      throw new LoginAlreadyInProgressError(result.traceId ?? undefined);
     case "OAuthError":
       throw new OAuth2Error(
         result.error,

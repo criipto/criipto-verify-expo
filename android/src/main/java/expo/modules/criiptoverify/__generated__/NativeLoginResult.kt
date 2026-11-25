@@ -29,6 +29,12 @@ sealed interface NativeLoginResult : Record {
     @Field var traceId: String? = null
   }
 
+  class LoginAlreadyInProgress : NativeLoginResult {
+    @Field override var kind: String = "LoginAlreadyInProgress"
+
+    @Field var traceId: String? = null
+  }
+
   class OAuthError : NativeLoginResult {
     @Field override var kind: String = "OAuthError"
 

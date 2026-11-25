@@ -15,6 +15,7 @@ import expo.modules.kotlin.records.Record
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import eu.idura.verify.IduraVerifyInternalException as SdkInternalException
+import eu.idura.verify.LoginAlreadyInProgressException as SdkLoginAlreadyInProgressException
 import eu.idura.verify.NoSuitableBrowserException as SdkNoSuitableBrowserException
 import eu.idura.verify.OAuthException as SdkOAuthException
 import eu.idura.verify.RedirectVerificationFailedException as SdkRedirectVerificationFailedException
@@ -102,6 +103,8 @@ class CriiptoVerifyExpoModule : Module() {
             NativeLoginResult.UserCancelled().apply { traceId = e.traceId }
           } catch (e: SdkNoSuitableBrowserException) {
             NativeLoginResult.NoSuitableBrowser().apply { traceId = e.traceId }
+          } catch (e: SdkLoginAlreadyInProgressException) {
+            NativeLoginResult.LoginAlreadyInProgress().apply { traceId = e.traceId }
           } catch (e: SdkOAuthException) {
             NativeLoginResult.OAuthError().apply {
               error = e.error

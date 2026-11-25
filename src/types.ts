@@ -44,6 +44,16 @@ export class NoSuitableBrowserError extends Error {
   }
 }
 
+export class LoginAlreadyInProgressError extends Error {
+  trace_id?: string;
+
+  constructor(trace_id?: string) {
+    super("A login is already in progress");
+    this.name = "LoginAlreadyInProgressError";
+    this.trace_id = trace_id;
+  }
+}
+
 export class IduraVerifyInternalError extends Error {
   trace_id?: string;
 

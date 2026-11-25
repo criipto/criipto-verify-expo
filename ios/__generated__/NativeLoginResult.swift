@@ -39,6 +39,17 @@ enum NativeLoginResult {
     }
   }
 
+  struct LoginAlreadyInProgress: Record {
+    @Field var kind: String = "LoginAlreadyInProgress"
+    @Field var traceId: String? = nil
+
+    init() {}
+
+    init(traceId: String? = nil) {
+      self.traceId = traceId
+    }
+  }
+
   struct OAuthError: Record {
     @Field var kind: String = "OAuthError"
     @Field var error: String = ""

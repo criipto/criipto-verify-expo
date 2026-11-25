@@ -3,6 +3,7 @@ export type { LoginParams, LoginResult } from "./CriiptoVerifyExpoModule";
 export type { Action, AcrValues, Claims, Prompt } from "./types";
 export {
   IduraVerifyInternalError,
+  LoginAlreadyInProgressError,
   ModuleNotConfiguredError,
   NoSuitableBrowserError,
   OAuth2Error,
