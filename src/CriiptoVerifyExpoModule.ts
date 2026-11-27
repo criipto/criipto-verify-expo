@@ -5,10 +5,12 @@ import {
   Action,
   Claims,
   IduraVerifyInternalError,
+  LoginAlreadyInProgressError,
   ModuleNotConfiguredError,
   NoSuitableBrowserError,
   OAuth2Error,
   Prompt,
+  RedirectVerificationFailedError,
   UnknownPromptError,
   UserCancelledError,
 } from "./types";
@@ -67,6 +69,8 @@ export async function login(params: LoginParams): Promise<LoginResult> {
       throw new UserCancelledError(result.traceId ?? undefined);
     case "NoSuitableBrowser":
       throw new NoSuitableBrowserError(result.traceId ?? undefined);
+    case "LoginAlreadyInProgress":
+      throw new LoginAlreadyInProgressError(result.traceId ?? undefined);
     case "OAuthError":
       throw new OAuth2Error(
         result.error,
@@ -76,6 +80,14 @@ export async function login(params: LoginParams): Promise<LoginResult> {
       );
     case "InternalError":
       throw new IduraVerifyInternalError(result.message, result.traceId ?? undefined);
+    case "RedirectVerificationFailed":
+      throw new RedirectVerificationFailedError(
+        result.message,
+        result.redirectUri,
+        result.packageName,
+        result.signingCertificateFingerprints,
+        result.traceId ?? undefined,
+      );
     case "ModuleNotConfigured":
       throw new ModuleNotConfiguredError(result.message);
     case "UnknownPrompt":

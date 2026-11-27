@@ -44,6 +44,16 @@ export class NoSuitableBrowserError extends Error {
   }
 }
 
+export class LoginAlreadyInProgressError extends Error {
+  trace_id?: string;
+
+  constructor(trace_id?: string) {
+    super("A login is already in progress");
+    this.name = "LoginAlreadyInProgressError";
+    this.trace_id = trace_id;
+  }
+}
+
 export class IduraVerifyInternalError extends Error {
   trace_id?: string;
 
@@ -51,6 +61,26 @@ export class IduraVerifyInternalError extends Error {
     super(message);
     this.name = "IduraVerifyInternalError";
     this.trace_id = trace_id;
+  }
+}
+
+export class RedirectVerificationFailedError extends IduraVerifyInternalError {
+  redirect_uri: string;
+  package_name: string;
+  signing_certificate_fingerprints: string[];
+
+  constructor(
+    message: string,
+    redirect_uri: string,
+    package_name: string,
+    signing_certificate_fingerprints: string[],
+    trace_id?: string,
+  ) {
+    super(message, trace_id);
+    this.name = "RedirectVerificationFailedError";
+    this.redirect_uri = redirect_uri;
+    this.package_name = package_name;
+    this.signing_certificate_fingerprints = signing_certificate_fingerprints;
   }
 }
 
